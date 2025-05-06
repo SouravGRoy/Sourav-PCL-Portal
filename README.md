@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Academic Portal - Multi-Role Academic Management System
+
+## Overview
+
+Academic Portal is a comprehensive web-based platform designed to facilitate academic management between faculty and students, with administrative oversight. The system handles assignment submissions, group management, and academic profiles for Jain University.
+
+## Core Features
+
+### Authentication System
+- Email/password-based login with university email domain restriction (@jainuniversity.ac.in)
+- Role-based access control (Super Admin, Faculty, Student)
+- Secure password requirements
+
+### User Roles & Permissions
+
+1. **Super Admin**
+   - Manages faculty accounts
+   - Views system-wide statistics
+   - Has complete oversight of all activities
+   - Default credentials: superadmin@jainuniversity.ac.in
+
+2. **Faculty (Admin)**
+   - Manages student groups
+   - Views student submissions
+   - Tracks student progress
+   - Manages their department information
+
+3. **Students**
+   - Create and manage academic profiles
+   - Submit assignments via URLs (e.g., Google Drive, GitHub)
+   - View their submission history
+   - Join faculty groups
+   - Track their academic progress
+
+### Student Management
+- Profile creation with academic details (Name, USN number, class, semester)
+- Group assignment system
+- Submission tracking
+
+### Faculty Management
+- Department assignment
+- Student group creation and management
+- Submission review system
+- Dashboard with analytics
+
+### Assignment Submission System
+- URL-based submission system
+- Timestamp tracking
+- Faculty group association
+- Submission history
+
+## Technical Stack
+
+- **Frontend**: Next.js with TypeScript
+- **UI**: Tailwind CSS + shadcn/ui components
+- **Backend**: Supabase + authentication
+- **State Management**: Zustand
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- Supabase account
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd academic-portal
+```
+
+2. Install dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up environment variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+4. Run the development server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This application can be easily deployed on Vercel:
 
-## Learn More
+1. Push your code to a GitHub repository
+2. Import the project in Vercel
+3. Set the environment variables
+4. Deploy
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License.
