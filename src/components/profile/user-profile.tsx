@@ -95,9 +95,12 @@ export default function UserProfileComponent() {
         
         if (error) throw error;
       } else if (role === 'faculty') {
+        console.log('Updating faculty profile with name:', name, 'and department:', department);
+        
         const { error } = await supabase
           .from('faculty_profiles')
           .update({
+            name, // Add name field to faculty profile update
             department
           })
           .eq('user_id', user.id);

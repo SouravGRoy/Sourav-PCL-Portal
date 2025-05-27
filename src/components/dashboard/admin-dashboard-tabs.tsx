@@ -203,109 +203,141 @@ export default function AdminDashboardTabs() {
 
   return (
     <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4 mb-8">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="students">Students</TabsTrigger>
-        <TabsTrigger value="faculty">Faculty</TabsTrigger>
-        <TabsTrigger value="settings">Settings</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 mb-4 sm:mb-8">
+        <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+        <TabsTrigger value="students" className="text-xs sm:text-sm">Students</TabsTrigger>
+        <TabsTrigger value="faculty" className="text-xs sm:text-sm">Faculty</TabsTrigger>
+        <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
       </TabsList>
       
       {/* Overview Tab */}
       <TabsContent value="overview" className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Faculty</CardTitle>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="border-blue-100 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Faculty
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{facultyCount}</div>
-              <p className="text-xs text-muted-foreground">Registered faculty members</p>
+            <CardContent className="pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-blue-700">{facultyCount}</div>
+              <p className="text-xs text-blue-600">Registered members</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+          <Card className="border-green-100 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center text-green-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Students
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studentCount}</div>
-              <p className="text-xs text-muted-foreground">Registered students</p>
+            <CardContent className="pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-green-700">{studentCount}</div>
+              <p className="text-xs text-green-600">Registered students</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Groups</CardTitle>
+          <Card className="border-purple-100 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center text-purple-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Groups
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{groupCount}</div>
-              <p className="text-xs text-muted-foreground">Active study groups</p>
+            <CardContent className="pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-purple-700">{groupCount}</div>
+              <p className="text-xs text-purple-600">Active study groups</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
+          <Card className="border-amber-100 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center text-amber-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Submissions
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{submissionCount}</div>
-              <p className="text-xs text-muted-foreground">Assignment submissions</p>
+            <CardContent className="pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-amber-700">{submissionCount}</div>
+              <p className="text-xs text-amber-600">Assignment submissions</p>
             </CardContent>
           </Card>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Students</CardTitle>
-              <CardDescription>Latest student registrations</CardDescription>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base sm:text-lg text-blue-800">Recent Students</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Latest student registrations</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>USN</TableHead>
-                    <TableHead>Registered</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.slice(0, 5).map((student) => (
-                    <TableRow key={student.id || `student-${Math.random()}`}>
-                      <TableCell className="font-medium">{student.name || 'N/A'}</TableCell>
-                      <TableCell>{student.usn || 'N/A'}</TableCell>
-                      <TableCell>{student.created_at ? new Date(student.created_at).toLocaleDateString() : 'N/A'}</TableCell>
+            <CardContent className="p-0 sm:p-6 pt-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs sm:text-sm">Name</TableHead>
+                      <TableHead className="text-xs sm:text-sm">USN</TableHead>
+                      <TableHead className="text-xs sm:text-sm">Registered</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {students.slice(0, 5).map((student) => (
+                      <TableRow key={student.id || `student-${Math.random()}`}>
+                        <TableCell className="font-medium text-xs sm:text-sm">
+                          <div className="truncate max-w-[100px] sm:max-w-none">{student.name || 'N/A'}</div>
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm">
+                          <div className="truncate max-w-[80px] sm:max-w-none">{student.usn || 'N/A'}</div>
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm">{student.created_at ? new Date(student.created_at).toLocaleDateString() : 'N/A'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Faculty</CardTitle>
-              <CardDescription>Latest faculty registrations</CardDescription>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base sm:text-lg text-green-800">Recent Faculty</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Latest faculty registrations</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Registered</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {faculty.slice(0, 5).map((f) => (
-                    <TableRow key={f.id || `faculty-${Math.random()}`}>
-                      <TableCell className="font-medium">{f.name || 'N/A'}</TableCell>
-                      <TableCell>{f.department || 'N/A'}</TableCell>
-                      <TableCell>{f.created_at ? new Date(f.created_at).toLocaleDateString() : 'N/A'}</TableCell>
+            <CardContent className="p-0 sm:p-6 pt-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs sm:text-sm">Name</TableHead>
+                      <TableHead className="text-xs sm:text-sm">Department</TableHead>
+                      <TableHead className="text-xs sm:text-sm">Registered</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {faculty.slice(0, 5).map((f) => (
+                      <TableRow key={f.id || `faculty-${Math.random()}`}>
+                        <TableCell className="font-medium text-xs sm:text-sm">
+                          <div className="truncate max-w-[100px] sm:max-w-none">{f.name || 'N/A'}</div>
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm">
+                          <div className="truncate max-w-[80px] sm:max-w-none">{f.department || 'N/A'}</div>
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm">{f.created_at ? new Date(f.created_at).toLocaleDateString() : 'N/A'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>

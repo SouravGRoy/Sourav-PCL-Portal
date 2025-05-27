@@ -13,12 +13,22 @@ export default function GroupList() {
 
   useEffect(() => {
     const fetchGroups = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log('No user found in GroupList component');
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Fetching groups for faculty ID:', user.id);
+      setIsLoading(true);
+      setError(null);
       
       try {
         const groupsData = await getGroupsByFaculty(user.id);
+        console.log('Groups fetched successfully:', groupsData.length);
         setGroups(groupsData);
       } catch (err: any) {
+        console.error('Error fetching groups:', err);
         setError(err.message || 'Failed to load groups');
       } finally {
         setIsLoading(false);

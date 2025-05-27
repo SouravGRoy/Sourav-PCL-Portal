@@ -1,23 +1,37 @@
 export type UserRole = 'superadmin' | 'faculty' | 'student';
 
-export interface UserProfile {
+export interface Profile {
   id: string;
   email: string;
   role: UserRole;
   name: string;
   created_at: string;
+  updated_at: string;
 }
 
-export interface StudentProfile extends UserProfile {
+export interface StudentProfile extends Profile {
   usn: string;
-  group_usn: string;
   class: string;
   semester: string;
-  subject_codes: string[];
+  group_usn: string;
+  subject_codes?: string[];
+  user_id?: string; // Reference to the profile ID
 }
 
-export interface FacultyProfile extends UserProfile {
+export interface FacultyProfile extends Profile {
   department: string;
+  name: string; // Added name field to match updated schema
+  user_id?: string; // Reference to the profile ID
+}
+
+export interface DriveLink {
+  id: string;
+  group_id: string;
+  student_id: string;
+  url: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Group {
@@ -26,25 +40,54 @@ export interface Group {
   faculty_id: string;
   department: string;
   pcl_group_no: string;
+  drive_link?: string;
   description?: string;
   created_at: string;
+  updated_at?: string;
   faculty_name?: string; // Added for UI display purposes
 }
 
 export interface StudentDriveLink {
   id: string;
+  student_id: string;
+  group_id: string;
   url: string;
   description: string;
   created_at: string;
   updated_at: string;
 }
 
+export interface Student {
+  id: string;
+  name: string;
+  usn: string;
+  group_usn?: string;
+  class?: string;
+  semester?: string;
+  email?: string;
+}
+
 export interface GroupMember {
   id: string;
-  group_id: string;
-  student_id: string;
-  joined_at: string;
-  drive_links?: StudentDriveLink[];
+  group_id?: string;
+  student_id?: string;
+  name: string;
+  usn: string;
+  group_usn: string;
+  class: string;
+  semester: string;
+  email?: string;
+  drive_links?: DriveLink[];
+  joined_at?: string;
+  student: {
+    id: string;
+    name: string;
+    usn: string;
+    group_usn: string;
+    class: string;
+    semester: string;
+    email?: string;
+  };
 }
 
 export interface Assignment {

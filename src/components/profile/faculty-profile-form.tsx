@@ -1,191 +1,133 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUserStore } from '@/lib/store';
-import { createFacultyProfile } from '@/lib/api/profiles';
-import { supabase } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+"use client";
+
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useUserStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
 export default function FacultyProfileForm() {
-  const [name, setName] = useState('');
-  const [department, setDepartment] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [supabaseUser, setSupabaseUser] = useState<any>(null);
-  
-  const router = useRouter();
   const { user, setRole } = useUserStore();
-
-  useEffect(() => {
-    // Get the current authenticated user from Supabase directly
-    const fetchUser = async () => {
-      // DEVELOPMENT MODE: Check for stored email first
-      const devEmail = localStorage.getItem('userEmail');
-      
-      if (devEmail) {
-        console.log('DEVELOPMENT MODE: Using stored email for profile:', devEmail);
-        // Create a mock user for development
-        setSupabaseUser({
-          id: 'dev-user-id',
-          email: devEmail,
-        } as any);
-        return;
-      }
-      
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setSupabaseUser(user);
-        } else {
-          // If no user is found, redirect to login
-          router.push('/auth/login');
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        setError('Authentication error. Please try logging in again.');
-      }
-    };
-
-    fetchUser();
-  }, [router]);
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: "",
+    department: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (!user) {
+      setError("User not authenticated");
+      router.push("/auth/login");
+      return;
+    }
+
+    // Trim and validate form data
+    const trimmedData = {
+      name: formData.name.trim(),
+      department: formData.department.trim(),
+    };
+
+    // Validate name is non-empty
+    if (!trimmedData.name) {
+      setError("Name is required");
+      return;
+    }
+
+    // Validate department is non-empty
+    if (!trimmedData.department) {
+      setError("Department is required");
+      return;
+    }
+
+    setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
-      // DEVELOPMENT MODE: Check if we're in development mode
-      const devEmail = localStorage.getItem('userEmail');
-      if (devEmail) {
-        console.log('DEVELOPMENT MODE: Simulating faculty profile creation');
-        // Simulate successful profile creation
-        setTimeout(() => {
-          // Store profile data in localStorage for development mode with email as key
-          const profileKey = `facultyProfile_${devEmail}`;
-          localStorage.setItem(profileKey, JSON.stringify({
-            name,
-            department,
-          }));
-          
-          // Set role and redirect
-          setRole('faculty');
-          router.push('/dashboard/faculty');
-        }, 1000);
-        return;
-      }
-      
-      // PRODUCTION MODE: Normal flow
-      // Use the Supabase user ID directly instead of the store user
-      if (!supabaseUser) {
-        throw new Error('User not authenticated');
-      }
+      console.log("Submitting faculty profile:", { user_id: user.id, ...trimmedData });
 
-      console.log('Creating faculty profile with user ID:', supabaseUser.id);
-      
-      // Check if the user already exists in the profiles table
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single();
+      const { data, error } = await supabase
+        .from("faculty_profiles")
+        .insert([
+          {
+            user_id: user.id,
+            name: trimmedData.name,
+            department: trimmedData.department,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+        ])
+        .select();
 
-      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is 'not found'
-        console.error('Error checking existing profile:', profileError);
-      }
+      if (error) throw error;
 
-      console.log('Existing profile check result:', existingProfile);
+      console.log("Faculty profile saved:", data);
+      setSuccess(true);
+      setError(null);
+
+      // Set role to faculty
+      setRole("faculty");
       
-      try {
-        await createFacultyProfile({
-          id: supabaseUser.id,
-          email: supabaseUser.email,
-          name,
-          department,
-          created_at: new Date().toISOString(),
-        });
-        
-        setRole('faculty');
-        router.push('/dashboard/faculty');
-      } catch (profileCreationError: any) {
-        console.error('Detailed profile creation error:', profileCreationError);
-        
-        // If there's a foreign key constraint error, it might be because the auth user doesn't exist
-        // Let's try to handle this case by showing a more helpful error message
-        if (profileCreationError.message && profileCreationError.message.includes('foreign key constraint')) {
-          setError('There was an issue with your account. Please try logging out and logging in again.');
-        } else {
-          throw profileCreationError;
-        }
-      }
+      // Redirect to dashboard after successful save
+      router.push("/dashboard");
     } catch (error: any) {
-      console.error('Profile creation error:', error);
-      setError(error.message || 'Failed to create profile');
+      console.error("Error saving faculty profile:", error.message);
+      setError(error.message || "Failed to save profile");
+      setSuccess(false);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-lg">
-        <CardTitle className="text-2xl font-bold">Complete Your Faculty Profile</CardTitle>
-        <CardDescription className="text-indigo-100">Please provide your academic details to continue</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="transition-all focus:ring-2 focus:ring-indigo-500"
-              placeholder="Dr. Jane Smith"
-              required
-            />
-            <p className="text-xs text-gray-500">Enter your full name as it should appear to students</p>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="department" className="text-sm font-medium">Department</Label>
-            <Input
-              id="department"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className="transition-all focus:ring-2 focus:ring-indigo-500"
-              placeholder="Computer Science and Engineering"
-              required
-            />
-            <p className="text-xs text-gray-500">Enter your academic department</p>
-          </div>
-          
-          {error && (
-            <div className="p-3 rounded-md bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600 font-medium">{error}</p>
-            </div>
-          )}
-          
-          <Button 
-            type="submit" 
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all" 
-            disabled={isLoading}
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Complete Your Faculty Profile</h2>
+      
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {success && <p className="text-green-500 mb-4">Profile saved successfully!</p>}
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+          </label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Enter your full name"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Department
+          </label>
+          <input
+            type="text"
+            value={formData.department}
+            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+            required
+            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Enter your department"
+          />
+        </div>
+        
+        <div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving Profile...
-              </>
-            ) : 'Complete Profile'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            {loading ? "Saving..." : "Save Profile"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

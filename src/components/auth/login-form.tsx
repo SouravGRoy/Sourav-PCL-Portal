@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { useUserStore } from "@/lib/store";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -15,49 +16,47 @@ export default function LoginForm() {
   const [resendSuccess, setResendSuccess] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const { setUser, setRole } = useUserStore();
 
-  // Check if the user has just verified their email
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const verified = searchParams.get('verified');
-    if (verified === 'true') {
+    const verified = searchParams.get("verified");
+    if (verified === "true") {
       setVerificationSuccess(true);
     }
   }, []);
 
   const handleResendVerification = async () => {
     if (!email) {
-      setError('Please enter your email address to resend the verification email');
+      setError(
+        "Please enter your email address to resend the verification email"
+      );
       return;
     }
-    
+
     setResendLoading(true);
     setError(null);
     setResendSuccess(false);
-    
+
     try {
       const { error } = await supabase.auth.resend({
-        type: 'signup',
+        type: "signup",
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      
+
       if (error) {
-        console.error('Error resending verification email:', error);
+        console.error("Error resending verification email:", error);
         setError(`Failed to resend verification email: ${error.message}`);
       } else {
         setResendSuccess(true);
         setError(null);
       }
     } catch (err: any) {
-      console.error('Unexpected error resending verification:', err);
-      setError(err.message || 'An unexpected error occurred');
+      console.error("Unexpected error resending verification:", err);
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setResendLoading(false);
     }
@@ -69,57 +68,72 @@ export default function LoginForm() {
     setError(null);
     setShowResendButton(false);
     setResendSuccess(false);
-    
-    // For debugging
-    console.log('Login form submitted with email:', email);
 
     try {
-      console.log("DEVELOPMENT MODE: Bypassing authentication");
-      console.log("Attempting to sign in with:", email);
-      
-      // Check if the user exists in profiles table to determine role
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Authentication error:", error);
+        if (error.message.includes("email not confirmed")) {
+          setShowResendButton(true);
+        }
+        setError(error.message);
+        return;
+      }
+
+      if (!data.user) {
+        setError("No user data returned");
+        return;
+      }
+
+      // Set user in the store
+      setUser(data.user);
+
+      // Check if profile exists and get the role
       const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', email)
+        .from("profiles")
+        .select("*")
+        .eq("id", data.user.id)
         .single();
 
-      if (userError && userError.code !== 'PGRST116') { // PGRST116 is 'not found'
+      if (userError && userError.code !== "PGRST116") {
         console.error("Error checking user:", userError);
-        // Continue anyway in development mode
+        setError("Failed to check user profile");
+        return;
       }
 
-      // DEVELOPMENT MODE: Skip actual authentication
-      // Determine role based on email domain or existing profile
-      let role = 'student'; // Default role
-      
-      if (email.endsWith('@faculty.jainuniversity.ac.in') || (userData && userData.role === 'faculty')) {
-        role = 'faculty';
-      } else if (email === 'superadmin@jainuniversity.ac.in') {
-        role = 'superadmin';
-      }
-      
-      console.log("Development login successful with role:", role);
-      
-      // Set role in local storage for development purposes
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('userEmail', email);
-      
-      // Wait a moment before redirecting
-      setTimeout(() => {
-        if (role === 'student') {
-          router.push("/dashboard/student");
-        } else if (role === 'faculty') {
+      // Redirect based on profile existence
+      if (!userData) {
+        router.push("/profile/complete");
+      } else {
+        // Set the role from the profile data
+        const userRole = userData.role;
+        console.log("User role from profile:", userRole);
+        setRole(userRole);
+        
+        // Store the role in localStorage for development purposes
+        localStorage.setItem('userRole', userRole);
+        localStorage.setItem('userEmail', email);
+        
+        // Redirect to the appropriate dashboard based on role
+        if (userRole === 'faculty') {
           router.push("/dashboard/faculty");
-        } else if (role === 'superadmin') {
-          router.push("/dashboard/admin");
+        } else if (userRole === 'student') {
+          router.push("/dashboard/student");
+        } else if (userRole === 'superadmin') {
+          router.push("/dashboard/admin"); // Using admin route for superadmin
         } else {
           router.push("/dashboard");
         }
-      }, 500);
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("An unexpected error occurred");
+        
+        console.log("Redirecting to dashboard for role:", userRole);
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setError("Failed to log in. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -137,11 +151,12 @@ export default function LoginForm() {
         {verificationSuccess && (
           <div className="p-4 mb-4 bg-green-50 border border-green-200 rounded-md">
             <p className="text-sm text-green-700">
-              <strong>Email verified successfully!</strong> You can now sign in with your credentials.
+              <strong>Email verified successfully!</strong> You can now sign in
+              with your credentials.
             </p>
           </div>
         )}
-        
+
         <form className="space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
@@ -210,14 +225,14 @@ export default function LoginForm() {
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
-            
+
             {showResendButton && (
               <div className="mt-4">
                 <p className="text-sm text-amber-600 mb-2">
                   Need a new verification email?
                 </p>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleResendVerification}
                   disabled={resendLoading}
@@ -226,15 +241,16 @@ export default function LoginForm() {
                 </button>
               </div>
             )}
-            
+
             {resendSuccess && (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
                 <p className="text-sm text-green-700">
-                  Verification email sent! Please check your inbox and follow the link to verify your email.
+                  Verification email sent! Please check your inbox and follow
+                  the link to verify your email.
                 </p>
               </div>
             )}
-            
+
             <div className="mt-6 text-center">
               <Link
                 href="/auth/register"
