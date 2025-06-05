@@ -130,7 +130,7 @@ export default function AssignmentPage({ params }: AssignmentPageProps) {
                   {isPastDue ? (
                     <p className="text-red-700">This assignment is past due. Late submissions may not be accepted.</p>
                   ) : (
-                    <p className="text-yellow-700">You haven't submitted this assignment yet.</p>
+                    <p className="text-yellow-700">You haven&apos;t submitted this assignment yet.</p>
                   )}
                   <div className="mt-4">
                     <Button asChild disabled={isPastDue}>

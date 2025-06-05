@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useUserStore } from '@/lib/store';
 import { getGroupsByFaculty } from '@/lib/api/groups';
 import { Group } from '@/types';
+import Link from 'next/link';
 
 export default function GroupList() {
   const { user } = useUserStore();
@@ -51,15 +52,15 @@ export default function GroupList() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Your Groups</h1>
         <Button asChild>
-          <a href="/groups/create">Create New Group</a>
+          <Link href="/groups/create">Create New Group</Link>
         </Button>
       </div>
       
       {groups.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">You haven't created any groups yet.</p>
+          <p className="text-gray-500">You haven&apos;t created any groups yet.</p>
           <Button asChild className="mt-4">
-            <a href="/groups/create">Create Your First Group</a>
+            <Link href="/groups/create">Create Your First Group</Link>
           </Button>
         </div>
       ) : (

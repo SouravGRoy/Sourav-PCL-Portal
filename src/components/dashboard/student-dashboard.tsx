@@ -14,6 +14,7 @@ import { getStudentAssignments } from "@/lib/api/assignments";
 import { getStudentSubmissions } from "@/lib/api/submissions";
 import { StudentProfile } from "@/types";
 import ProfileModal from "@/components/profile/profile-modal";
+import Link from "next/link";
 
 export default function StudentDashboard() {
   const { user } = useUserStore();
@@ -390,7 +391,7 @@ export default function StudentDashboard() {
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
+          <Link
             href="/groups/my"
             className="group block p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-md transition-all"
           >
@@ -418,9 +419,9 @@ export default function StudentDashboard() {
             <p className="text-sm text-gray-600">
               View your groups and submit drive links
             </p>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/assignments/my"
             className="group block p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm hover:shadow-md transition-all"
           >
@@ -448,7 +449,7 @@ export default function StudentDashboard() {
             <p className="text-sm text-gray-600">
               Check your pending assignments and deadlines
             </p>
-          </a>
+          </Link>
 
           <a
             href="/submissions"

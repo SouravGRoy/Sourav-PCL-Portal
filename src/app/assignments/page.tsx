@@ -87,7 +87,7 @@ export default function AssignmentsPage() {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Assignments Module Under Development</h3>
-            <p className="text-gray-600 text-center max-w-md mb-6">We're working hard to bring you a comprehensive assignments management system. Check back soon!</p>
+            <p className="text-gray-600 text-center max-w-md mb-6">We&apos;re working hard to bring you a comprehensive assignments management system. Check back soon!</p>
             <div className="w-full max-w-md bg-gray-200 rounded-full h-2.5 mb-2">
               <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: '65%' }}></div>
             </div>
@@ -96,8 +96,8 @@ export default function AssignmentsPage() {
         </div>
         
         <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Want to be notified when it's ready?</h3>
-          <p className="text-gray-600 mb-4">We'll let you know as soon as the assignments module is available.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-3">Want to be notified when it&apos;s ready?</h3>
+          <p className="text-gray-600 mb-4">We&apos;ll let you know as soon as the assignments module is available.</p>
           <div className="flex">
             <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
               Subscribe to Updates

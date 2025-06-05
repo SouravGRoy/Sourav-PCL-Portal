@@ -507,7 +507,7 @@ export default function StudentGroups() {
           </svg>
           <h2 className="text-xl font-semibold mb-2">No Groups Assigned</h2>
           <p className="text-gray-600 mb-6">
-            You haven't been assigned to any groups yet.
+            You haven&apos;t been assigned to any groups yet.
           </p>
           <p className="text-gray-500">
             Please contact your faculty if you believe this is an error.
@@ -607,7 +607,7 @@ export default function StudentGroups() {
                       </div>
                     ) : (
                       <p className="text-gray-500 text-sm">
-                        You haven't added any drive links yet.
+                        You haven&apos;t added any drive links yet.
                       </p>
                     )}
 
@@ -675,7 +675,7 @@ export default function StudentGroups() {
                       </Dialog>
                     ) : (
                       <p className="text-amber-600 text-sm">
-                        You've reached the maximum of 5 drive links for this
+                        You&apos;ve reached the maximum of 5 drive links for this
                         group.
                       </p>
                     )}

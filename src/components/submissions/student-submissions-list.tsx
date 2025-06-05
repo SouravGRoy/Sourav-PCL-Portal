@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useUserStore } from '@/lib/store';
 import { getStudentSubmissions } from '@/lib/api/submissions';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 export default function StudentSubmissionsList() {
   const { user } = useUserStore();
@@ -60,9 +61,9 @@ export default function StudentSubmissionsList() {
       
       {submissions.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">You haven't submitted any assignments yet.</p>
+          <p className="text-gray-500">You haven&apos;t submitted any assignments yet.</p>
           <Button asChild className="mt-4">
-            <a href="/assignments/my">View Assignments</a>
+            <Link href="/assignments/my">View Assignments</Link>
           </Button>
         </div>
       ) : (

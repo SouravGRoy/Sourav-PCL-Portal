@@ -332,7 +332,7 @@ export default function SubmissionsReviewPage() {
           </div>
 
           <p className="text-gray-600 mb-4">
-            We're working on bringing you a comprehensive submissions review
+            We&apos;re working on bringing you a comprehensive submissions review
             system with the following features:
           </p>
 

@@ -135,7 +135,7 @@ export default function CreateAssignmentPage() {
             </div>
           </div>
           
-          <p className="text-gray-600 mb-4">We're working on bringing you a powerful assignment creation tool with the following features:</p>
+          <p className="text-gray-600 mb-4">We&apos;re working on bringing you a powerful assignment creation tool with the following features:</p>
           
           <ul className="list-disc pl-5 mb-4 text-gray-600 space-y-1">
             <li>Rich text editor with formatting options</li>

@@ -10,11 +10,11 @@ const supabaseAdmin = createClient(
 
 export async function GET(
   request: Request,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
-    const groupId = params.groupId;
-    
+    const groupId = (await params).groupId;
+
     if (!groupId) {
       return NextResponse.json(
         { error: 'Missing groupId parameter' },
