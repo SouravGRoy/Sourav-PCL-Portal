@@ -6,6 +6,7 @@ import { getFacultyProfile, getStudentCount } from '@/lib/api/profiles';
 import { getGroupsByFaculty, getGroupCountByFaculty } from '@/lib/api/groups';
 import { getFacultyAssignments } from '@/lib/api/assignments';
 import { FacultyProfile } from '@/types';
+import Link from 'next/link';
 
 export default function FacultyDashboard() {
   // Force component refresh function
@@ -319,7 +320,7 @@ export default function FacultyDashboard() {
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <a href="/groups/manage" className="group block p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-md transition-all">
+          <Link href="/groups/manage" className="group block p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center mb-3">
               <div className="p-2 bg-blue-100 group-hover:bg-blue-200 rounded-lg transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -329,9 +330,9 @@ export default function FacultyDashboard() {
               <h3 className="ml-3 text-lg font-medium text-gray-900">Manage Groups</h3>
             </div>
             <p className="text-sm text-gray-500">Create and manage research groups for students</p>
-          </a>
+          </Link>
           
-          <a href="/groups/submissions" className="group block p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm hover:shadow-md transition-all">
+          <Link href="/groups/submissions" className="group block p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center mb-3">
               <div className="p-2 bg-purple-100 group-hover:bg-purple-200 rounded-lg transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -341,7 +342,7 @@ export default function FacultyDashboard() {
               <h3 className="ml-3 text-lg font-medium text-gray-900">View Submissions</h3>
             </div>
             <p className="text-sm text-gray-500">Review and grade student group submissions</p>
-          </a>
+          </Link>
           
           <a href="/profile" className="group block p-5 bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center mb-3">

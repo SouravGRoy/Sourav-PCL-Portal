@@ -418,7 +418,7 @@ export default function EnhancedFacultyProfile() {
                 <div className="text-center py-10">
                   <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-1">No Research Groups Yet</h3>
-                  <p className="text-gray-500 mb-4">You haven't created any research groups yet.</p>
+                  <p className="text-gray-500 mb-4">You haven&apos;t created any research groups yet.</p>
                   <Button asChild>
                     <a href="/dashboard">Create a Group</a>
                   </Button>

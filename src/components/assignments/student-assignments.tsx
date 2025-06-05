@@ -5,6 +5,7 @@ import { useUserStore } from '@/lib/store';
 import { getStudentAssignments } from '@/lib/api/assignments';
 import { getStudentSubmissionForAssignment } from '@/lib/api/submissions';
 import { Assignment } from '@/types';
+import Link from 'next/link';
 
 export default function StudentAssignments() {
   const { user } = useUserStore();
@@ -60,10 +61,10 @@ export default function StudentAssignments() {
       
       {assignments.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">You don't have any assignments yet.</p>
+          <p className="text-gray-500">You don&apos;t have any assignments yet.</p>
           <p className="text-sm text-gray-400 mt-2">Join a group to get assignments.</p>
           <Button asChild className="mt-4">
-            <a href="/groups/join">Join Groups</a>
+            <Link href="/groups/join">Join Groups</Link>
           </Button>
         </div>
       ) : (
@@ -102,7 +103,7 @@ export default function StudentAssignments() {
           <div>
             <h2 className="text-xl font-semibold mb-4">Completed Assignments ({completedAssignments.length})</h2>
             {completedAssignments.length === 0 ? (
-              <p className="text-gray-500 p-4 bg-gray-50 rounded-lg">You haven't completed any assignments yet.</p>
+              <p className="text-gray-500 p-4 bg-gray-50 rounded-lg">You haven&apos;t completed any assignments yet.</p>
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {completedAssignments.map((assignment) => (

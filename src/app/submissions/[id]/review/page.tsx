@@ -213,7 +213,7 @@ export default function ReviewSubmissionPage({ params }: ReviewSubmissionPagePro
             </div>
           </div>
           
-          <p className="text-gray-600 mb-4">We're working on bringing you a powerful submission review system with the following features:</p>
+          <p className="text-gray-600 mb-4">We&apos;re working on bringing you a powerful submission review system with the following features:</p>
           
           <ul className="list-disc pl-5 mb-4 text-gray-600 space-y-1">
             <li>Inline code review with comments</li>

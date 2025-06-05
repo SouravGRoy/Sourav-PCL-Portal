@@ -115,16 +115,16 @@ export default function CreateGroupPage() {
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium">Step 1: Create a Group</h3>
-                <p>Fill out the form with your group details and click "Create Group"</p>
+                <p>Fill out the form with your group details and click &ldquo;Create Group&rdquo;</p>
               </div>
               
               <div>
                 <h3 className="font-medium">Step 2: Add Students</h3>
-                <p>After creating a group, you'll be redirected to the groups page where you can:</p>
+                <p>After creating a group, you&apos;ll be redirected to the groups page where you can:</p>
                 <ul className="list-disc pl-5 mt-2 space-y-1">
                   <li>Click on a group to select it</li>
                   <li>Use the search bar to find students by USN</li>
-                  <li>Click "Add" to add students to your group</li>
+                  <li>Click &ldquo;Add&rdquo; to add students to your group</li>
                 </ul>
               </div>
               

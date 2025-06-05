@@ -5,6 +5,7 @@ import { useUserStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import { addStudentToGroup } from '@/lib/api/groups';
 import { Group } from '@/types';
+import Link from 'next/link';
 
 export default function JoinGroupList() {
   const { user } = useUserStore();
@@ -82,7 +83,7 @@ export default function JoinGroupList() {
       {availableGroups.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-lg">
           <p className="text-gray-500">No available groups to join.</p>
-          <p className="text-sm text-gray-400 mt-2">You've joined all available groups or there are no groups created yet.</p>
+          <p className="text-sm text-gray-400 mt-2">You&apos;ve joined all available groups or there are no groups created yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -112,7 +113,7 @@ export default function JoinGroupList() {
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Your Joined Groups</h2>
           <Button asChild variant="outline">
-            <a href="/groups/my">View My Groups</a>
+            <Link href="/groups/my">View My Groups</Link>
           </Button>
         </div>
       )}
