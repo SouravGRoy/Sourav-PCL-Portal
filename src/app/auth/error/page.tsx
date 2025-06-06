@@ -1,26 +1,36 @@
+// src/app/auth/error/page.tsx
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import AuthErrorDisplay from './auth-error-display';
+
+function AuthErrorFallback() {
+  return (
+    <>
+      <CardHeader>
+        <CardTitle className="text-red-600">Authentication Error</CardTitle>
+        <CardDescription>
+          Loading error details...
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+          <p className="text-sm text-red-700">Please wait while we load the error details.</p>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button asChild className="w-full" disabled>
+          <Link href="/auth/login">Go to Login</Link>
+        </Button>
+      </CardFooter>
+    </>
+  );
+}
 
 export default function AuthErrorPage() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
-  const errorDescription = searchParams.get("error_description");
-
-  // Friendly error messages for common errors
-  const getErrorMessage = () => {
-    if (error === "otp_expired") {
-      return "The verification link has expired. Please request a new verification link.";
-    }
-    if (error === "exchange_failed") {
-      return "Failed to verify your email. Please try again.";
-    }
-    return errorDescription || "An error occurred during authentication.";
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -33,35 +43,15 @@ export default function AuthErrorPage() {
           </p>
         </div>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-red-600">Authentication Error</CardTitle>
-            <CardDescription>
-              We encountered a problem with your authentication
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
-              <p className="text-sm text-red-700">{getErrorMessage()}</p>
-            </div>
-            <div className="mt-4 space-y-4">
-              {error === "otp_expired" && (
-                <Button asChild className="w-full">
-                  <Link href="/auth/forgot-password">Request New Link</Link>
-                </Button>
-              )}
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/auth/login">Return to Login</Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/auth/register">Create New Account</Link>
-              </Button>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-500">
-              Need help? Contact support at support@jainuniversity.ac.in
+          <Suspense fallback={<AuthErrorFallback />}>
+            <AuthErrorDisplay />
+          </Suspense>
+          {/* Optional: Add a generic footer outside the Suspense boundary if needed */}
+          {/* <CardFooter className="flex justify-center pt-4">
+            <p className="text-xs text-gray-500">
+              If problems persist, contact support at support@jainuniversity.ac.in
             </p>
-          </CardFooter>
+          </CardFooter> */}
         </Card>
       </div>
     </div>

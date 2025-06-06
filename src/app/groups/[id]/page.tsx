@@ -1,31 +1,13 @@
-"use client";
+// src/app/groups/[id]/page.tsx
+import GroupClientPage from './group-client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import MainLayout from '@/components/layout/main-layout';
-import GroupDetail from '@/components/groups/group-detail';
-import { useUserStore } from '@/lib/store';
-
-interface GroupPageProps {
-  params: {
-    id: string;
-  };
+interface ResolvedParams {
+  id: string;
 }
 
-export default function GroupPage({ params }: GroupPageProps) {
-  const router = useRouter();
-  const { user } = useUserStore();
+export default async function GroupServerPage({ params: paramsPromise }: { params: Promise<ResolvedParams> }) {
+  const params = await paramsPromise;
   const groupId = params.id;
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-    }
-  }, [user, router]);
-
-  return (
-    <MainLayout>
-      <GroupDetail groupId={groupId} />
-    </MainLayout>
-  );
+  return <GroupClientPage groupId={groupId} />;
 }

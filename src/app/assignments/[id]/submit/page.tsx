@@ -1,38 +1,14 @@
-"use client";
+"use server";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import MainLayout from '@/components/layout/main-layout';
-import SubmitAssignmentForm from '@/components/assignments/submit-assignment-form';
-import { useUserStore } from '@/lib/store';
+import SubmitAssignmentClientPage from './submit-client';
 
-interface SubmitAssignmentPageProps {
-  params: {
-    id: string;
-  };
+interface ResolvedParams {
+  id: string;
 }
 
-export default function SubmitAssignmentPage({ params }: SubmitAssignmentPageProps) {
-  const router = useRouter();
-  const { user, role } = useUserStore();
+export default async function SubmitAssignmentServerPage({ params: paramsPromise }: { params: Promise<ResolvedParams> }) {
+  const params = await paramsPromise;
   const assignmentId = params.id;
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
-
-    if (role !== 'student') {
-      router.push('/dashboard');
-    }
-  }, [user, role, router]);
-
-  return (
-    <MainLayout>
-      <div className="max-w-md mx-auto">
-        <SubmitAssignmentForm assignmentId={assignmentId} />
-      </div>
-    </MainLayout>
-  );
+  return <SubmitAssignmentClientPage assignmentId={assignmentId} />;
 }

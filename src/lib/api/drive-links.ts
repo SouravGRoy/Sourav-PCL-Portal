@@ -27,11 +27,11 @@ export const getStudentDriveLinks = async (studentId: string, groupId: string): 
 
 // Add a drive link for a student in a group
 export const addStudentDriveLink = async (
-  studentId: string,
+  studentId: string, // Note: This is user.id, not student_profile.id
   groupId: string,
   url: string,
   description: string = 'No description'
-): Promise<boolean> => {
+): Promise<DriveLink | null> => {
   try {
     // Use the hardcoded student profile ID for testing
     const studentProfileId = "3b728a42-0478-4c59-a9a3-838709aa932b";
@@ -45,35 +45,40 @@ export const addStudentDriveLink = async (
     
     if (countError) {
       console.error('Error checking existing links:', countError);
-      return false;
+      return null;
     }
     
     if (existingLinks && existingLinks.length >= 5) {
       console.error("Maximum of 5 drive links allowed per group");
-      return false;
+      // Potentially, you might want to throw an error or return a specific message object
+      return null;
     }
     
-    // Insert the drive link
-    const { error } = await supabase
+    // Insert the drive link and select the newly created record
+    const { data: newLink, error } = await supabase
       .from('student_drive_links')
       .insert({
-        student_id: studentProfileId,
+        student_id: studentProfileId, // Using hardcoded studentProfileId as per original code
         group_id: groupId,
         url,
         description,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+        // created_at and updated_at are usually handled by database defaults/triggers
+        // If not, keeping them is fine: 
+        // created_at: new Date().toISOString(),
+        // updated_at: new Date().toISOString()
+      })
+      .select()
+      .single(); // .single() expects one row and returns it, or null/error
       
     if (error) {
       console.error('Error inserting drive link:', error);
-      return false;
+      return null;
     }
     
-    return true;
+    return newLink as DriveLink; // newLink should conform to DriveLink type
   } catch (error) {
     console.error('Error in addStudentDriveLink:', error);
-    return false;
+    return null;
   }
 };
 

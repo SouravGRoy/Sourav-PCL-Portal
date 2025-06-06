@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUserStore } from '@/lib/store';
 import { getProfileById, updateProfile } from '@/lib/api/profiles';
-import { UserProfile, StudentProfile, FacultyProfile } from '@/types';
+import { Profile, StudentProfile, FacultyProfile } from '@/types';
 import { supabase } from '@/lib/supabase';
 
 export default function UserProfileComponent() {

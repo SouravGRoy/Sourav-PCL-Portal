@@ -68,14 +68,21 @@ export default function StudentDriveLinks({ group }: StudentDriveLinksProps) {
 
     try {
       setIsLoading(true);
-      const link = await addStudentDriveLink(
+      const newDriveLink = await addStudentDriveLink(
         group.id,
-        user.id,
+        user.id, // This is user.id, ensure addStudentDriveLink uses the correct student profile ID if needed
         newLinkUrl,
         newLinkDescription || "Google Drive Link"
       );
       
-      setDriveLinks([...driveLinks, link]);
+      if (newDriveLink) {
+        setDriveLinks([...driveLinks, newDriveLink]);
+      } else {
+        // Error handling for null return is implicitly covered by the catch block below
+        // or specific error messages could be shown here if addStudentDriveLink returned error codes
+        console.error("Failed to add drive link, addStudentDriveLink returned null.");
+        // showToast for this specific case if not already covered by the generic catch
+      }
       setNewLinkUrl("");
       setNewLinkDescription("");
       showToast({

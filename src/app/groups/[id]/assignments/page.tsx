@@ -1,31 +1,13 @@
-"use client";
+// src/app/groups/[id]/assignments/page.tsx
+import GroupAssignmentsClientPage from './assignments-client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import MainLayout from '@/components/layout/main-layout';
-import AssignmentList from '@/components/assignments/assignment-list';
-import { useUserStore } from '@/lib/store';
-
-interface GroupAssignmentsPageProps {
-  params: {
-    id: string;
-  };
+interface ResolvedParams {
+  id: string; // This 'id' is the groupId from the URL
 }
 
-export default function GroupAssignmentsPage({ params }: GroupAssignmentsPageProps) {
-  const router = useRouter();
-  const { user } = useUserStore();
+export default async function GroupAssignmentsServerPage({ params: paramsPromise }: { params: Promise<ResolvedParams> }) {
+  const params = await paramsPromise;
   const groupId = params.id;
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-    }
-  }, [user, router]);
-
-  return (
-    <MainLayout>
-      <AssignmentList groupId={groupId} />
-    </MainLayout>
-  );
+  return <GroupAssignmentsClientPage groupId={groupId} />;
 }
