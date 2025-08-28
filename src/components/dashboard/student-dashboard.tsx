@@ -7,12 +7,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/lib/store";
 import { getStudentProfile } from "@/lib/api/profiles";
 import { getStudentGroups } from "@/lib/api/groups";
 import { getStudentAssignments } from "@/lib/api/assignments";
 import { getStudentSubmissions } from "@/lib/api/submissions";
+import {
+  getStudentRecentActivities,
+  getActivityIcon,
+  getRelativeTime,
+  Activity,
+} from "@/lib/api/activities";
 import { StudentProfile } from "@/types";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 import ProfileModal from "@/components/profile/profile-modal";
 import Link from "next/link";
 
@@ -26,6 +34,8 @@ export default function StudentDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -60,6 +70,19 @@ export default function StudentDashboard() {
             (a) => !submissions.some((s) => s.assignment_id === a.id)
           ).length
         );
+
+        // Fetch recent activities
+        try {
+          setActivitiesLoading(true);
+          const activitiesData = await getStudentRecentActivities(user.id, 3);
+          setRecentActivities(activitiesData);
+        } catch (activityError) {
+          console.error("Error fetching activities:", activityError);
+          // Don't fail the whole dashboard if activities fail
+          setRecentActivities([]);
+        } finally {
+          setActivitiesLoading(false);
+        }
       } catch (error: any) {
         console.error("Error fetching dashboard data:", {
           message: error?.message || "Unknown error",
@@ -125,7 +148,7 @@ export default function StudentDashboard() {
               </div>
               <div className="mt-4 md:mt-0 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-xs sm:text-sm">
                 <div className="font-medium">
-                  Last Login: {new Date().toLocaleDateString()}
+                  Last Login: {formatDate(new Date())}
                 </div>
               </div>
             </div>
@@ -137,7 +160,9 @@ export default function StudentDashboard() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 sm:px-4 sm:py-3">
                 <p className="text-blue-100">Group USN</p>
-                <p className="font-medium truncate">{profile.group_usn || "N/A"}</p>
+                <p className="font-medium truncate">
+                  {profile.group_usn || "N/A"}
+                </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 sm:px-4 sm:py-3">
                 <p className="text-blue-100">Class</p>
@@ -145,7 +170,9 @@ export default function StudentDashboard() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 sm:px-4 sm:py-3">
                 <p className="text-blue-100">Semester</p>
-                <p className="font-medium truncate">{profile.semester || "N/A"}</p>
+                <p className="font-medium truncate">
+                  {profile.semester || "N/A"}
+                </p>
               </div>
             </div>
           </div>
@@ -176,12 +203,16 @@ export default function StudentDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between">
-              <p className="text-2xl sm:text-3xl font-bold text-blue-700">{groupCount}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-700">
+                {groupCount}
+              </p>
               <div className="bg-blue-50 text-blue-600 text-xs font-medium px-2 py-1 rounded">
                 Active
               </div>
             </div>
-            <p className="text-xs sm:text-sm text-blue-600 mt-1">Joined study groups</p>
+            <p className="text-xs sm:text-sm text-blue-600 mt-1">
+              Joined study groups
+            </p>
             <div className="mt-3 sm:mt-4 h-1 w-full bg-gray-200 rounded">
               <div
                 className="h-1 bg-blue-500 rounded"
@@ -504,36 +535,44 @@ export default function StudentDashboard() {
         </h2>
         <Card className="shadow-md">
           <CardContent className="p-0">
-            <div className="divide-y">
-              <div className="p-4 flex items-start">
-                <div className="flex-shrink-0 mr-3 mt-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                </div>
-                <div>
-                  <p className="font-medium">Profile Completed</p>
-                  <p className="text-sm text-gray-500">
-                    You completed your student profile
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date().toLocaleString()}
-                  </p>
-                </div>
+            {activitiesLoading ? (
+              <div className="p-4 text-center text-gray-500">
+                Loading activities...
               </div>
-              <div className="p-4 flex items-start">
-                <div className="flex-shrink-0 mr-3 mt-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                </div>
-                <div>
-                  <p className="font-medium">Account Created</p>
-                  <p className="text-sm text-gray-500">
-                    Your student account was created
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(new Date().getTime() - 3600000).toLocaleString()}
-                  </p>
-                </div>
+            ) : recentActivities.length > 0 ? (
+              <div className="divide-y">
+                {recentActivities.map((activity, index) => {
+                  const { icon, color } = getActivityIcon(activity.type);
+                  return (
+                    <div key={index} className="p-4 flex items-start">
+                      <div className="flex-shrink-0 mr-3 mt-1">
+                        <div className={`w-2 h-2 rounded-full ${color}`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{activity.title}</p>
+                        <p className="text-sm text-gray-500">
+                          {activity.description}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-gray-400">
+                            {getRelativeTime(activity.timestamp)}
+                          </p>
+                          {activity.type === "assignment_created" && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                              New
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            ) : (
+              <div className="p-4 text-center text-gray-500">
+                No recent activities
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

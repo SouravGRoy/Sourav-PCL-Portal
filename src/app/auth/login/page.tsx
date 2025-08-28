@@ -11,7 +11,7 @@ export default function LoginPage() {
             Academic Portal
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Jain University Academic Management System
+            University Academic Management System
           </p>
         </div>
         <LoginForm />

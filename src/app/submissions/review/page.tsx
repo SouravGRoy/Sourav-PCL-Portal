@@ -11,8 +11,8 @@ export default function SubmissionsReviewPage() {
       title: "Programming Assignment #3",
       student: {
         name: "Reyna",
-        usn: "24bsr08100",
-        email: "24bsr08100@jainuniversity.ac.in",
+        usn: "24abc08100",
+        email: "24abc08100@university.ac.in",
       },
       group: {
         name: "FSP - B Group 4",
@@ -27,8 +27,8 @@ export default function SubmissionsReviewPage() {
       title: "Database Design Project",
       student: {
         name: "Alex Johnson",
-        usn: "24bsr08101",
-        email: "24bsr08101@jainuniversity.ac.in",
+        usn: "24abc08101",
+        email: "24abc08101@university.ac.in",
       },
       group: {
         name: "FSP - A Group 2",
@@ -43,8 +43,8 @@ export default function SubmissionsReviewPage() {
       title: "UI/UX Design Challenge",
       student: {
         name: "Priya Sharma",
-        usn: "24bsr08102",
-        email: "24bsr08102@jainuniversity.ac.in",
+        usn: "24abc08102",
+        email: "24abc08102@university.ac.in",
       },
       group: {
         name: "FSP - C Group 1",
@@ -245,17 +245,23 @@ export default function SubmissionsReviewPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {new Date(submission.submittedAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                        })}
+                        {new Date(submission.submittedAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          }
+                        )}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {new Date(submission.submittedAt).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {new Date(submission.submittedAt).toLocaleTimeString(
+                          "en-US",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -332,8 +338,8 @@ export default function SubmissionsReviewPage() {
           </div>
 
           <p className="text-gray-600 mb-4">
-            We&apos;re working on bringing you a comprehensive submissions review
-            system with the following features:
+            We&apos;re working on bringing you a comprehensive submissions
+            review system with the following features:
           </p>
 
           <ul className="list-disc pl-5 mb-4 text-gray-600 space-y-1">

@@ -1,24 +1,30 @@
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUserStore } from '@/lib/store';
-import { createGroup } from '@/lib/api/groups';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useUserStore } from "@/lib/store";
+import { createGroup } from "@/lib/api/groups";
 
 interface CreateGroupFormProps {
   onSuccess?: () => void;
 }
 
 export default function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
-  const [name, setName] = useState('');
-  const [department, setDepartment] = useState('');
-  const [pclGroupNo, setPclGroupNo] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [department, setDepartment] = useState("");
+  const [pclGroupNo, setPclGroupNo] = useState("");
+  const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const router = useRouter();
   const { user } = useUserStore();
 
@@ -29,31 +35,31 @@ export default function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
 
     // Validate required fields
     if (!name) {
-      setError('Group name is required');
+      setError("Group name is required");
       setIsLoading(false);
       return;
     }
 
     if (!department) {
-      setError('Department is required');
+      setError("Department is required");
       setIsLoading(false);
       return;
     }
 
     if (!pclGroupNo) {
-      setError('PCL Group Number is required');
+      setError(" Group Number is required");
       setIsLoading(false);
       return;
     }
 
     try {
       if (!user) {
-        console.error('No user found in store when trying to create group');
-        throw new Error('User not authenticated');
+        console.error("No user found in store when trying to create group");
+        throw new Error("User not authenticated");
       }
 
-      console.log('Creating group with faculty ID:', user.id);
-      
+      console.log("Creating group with faculty ID:", user.id);
+
       // Create the group in Supabase with all required fields
       await createGroup({
         name,
@@ -62,18 +68,18 @@ export default function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
         description,
         faculty_id: user.id,
       });
-      
-      console.log('Group created successfully');
-      
+
+      console.log("Group created successfully");
+
       // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess();
       }
-      
-      router.push('/groups');
+
+      router.push("/groups");
     } catch (error: any) {
-      console.error('Error creating group:', error);
-      setError(error.message || 'Failed to create group');
+      console.error("Error creating group:", error);
+      setError(error.message || "Failed to create group");
     } finally {
       setIsLoading(false);
     }
@@ -109,17 +115,15 @@ export default function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="pcl-group-no">PCL Group Number *</Label>
+            <Label htmlFor="pcl-group-no"> Group Number *</Label>
             <Input
               id="pcl-group-no"
               value={pclGroupNo}
               onChange={(e) => setPclGroupNo(e.target.value)}
-              placeholder="Enter PCL group number"
+              placeholder="Enter Group number"
               disabled={isLoading}
             />
           </div>
-
-
 
           <div className="space-y-2">
             <Label htmlFor="description">Description (Optional)</Label>
@@ -131,15 +135,15 @@ export default function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
               disabled={isLoading}
             />
           </div>
-          
+
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
               {error}
             </div>
           )}
-          
+
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creating...' : 'Create Group'}
+            {isLoading ? "Creating..." : "Create Group"}
           </Button>
         </form>
       </CardContent>

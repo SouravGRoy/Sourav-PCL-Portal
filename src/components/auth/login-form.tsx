@@ -113,22 +113,22 @@ export default function LoginForm() {
         const userRole = userData.role;
         console.log("User role from profile:", userRole);
         setRole(userRole);
-        
+
         // Store the role in localStorage for development purposes
-        localStorage.setItem('userRole', userRole);
-        localStorage.setItem('userEmail', email);
-        
+        localStorage.setItem("userRole", userRole);
+        localStorage.setItem("userEmail", email);
+
         // Redirect to the appropriate dashboard based on role
-        if (userRole === 'faculty') {
+        if (userRole === "faculty") {
           router.push("/dashboard/faculty");
-        } else if (userRole === 'student') {
+        } else if (userRole === "student") {
           router.push("/dashboard/student");
-        } else if (userRole === 'superadmin') {
+        } else if (userRole === "superadmin") {
           router.push("/dashboard/admin"); // Using admin route for superadmin
         } else {
           router.push("/dashboard");
         }
-        
+
         console.log("Redirecting to dashboard for role:", userRole);
       }
     } catch (error: any) {
@@ -157,7 +157,11 @@ export default function LoginForm() {
           </div>
         )}
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form
+          className="space-y-6"
+          onSubmit={handleSubmit}
+          suppressHydrationWarning
+        >
           {error && (
             <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
               <p className="text-sm text-red-700">{error}</p>
@@ -181,6 +185,7 @@ export default function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                suppressHydrationWarning
               />
             </div>
           </div>
@@ -202,6 +207,7 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                suppressHydrationWarning
               />
             </div>
           </div>

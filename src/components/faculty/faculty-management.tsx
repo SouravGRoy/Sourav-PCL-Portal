@@ -1,42 +1,56 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useUserStore } from '@/lib/store';
-import { getAllFaculty } from '@/lib/api/profiles';
-import { supabase } from '@/lib/supabase';
-import { FacultyProfile } from '@/types';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useUserStore } from "@/lib/store";
+import { getAllFaculty } from "@/lib/api/profiles";
+import { supabase } from "@/lib/supabase";
+import { FacultyProfile } from "@/types";
 
 export default function FacultyManagement() {
   const { user } = useUserStore();
   const [faculty, setFaculty] = useState<FacultyProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // New faculty form state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newFacultyEmail, setNewFacultyEmail] = useState('');
-  const [newFacultyName, setNewFacultyName] = useState('');
-  const [newFacultyDepartment, setNewFacultyDepartment] = useState('');
+  const [newFacultyEmail, setNewFacultyEmail] = useState("");
+  const [newFacultyName, setNewFacultyName] = useState("");
+  const [newFacultyDepartment, setNewFacultyDepartment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFaculty = async () => {
       if (!user) return;
-      
+
       try {
         const facultyData = await getAllFaculty();
         setFaculty(facultyData);
       } catch (err: any) {
-        setError(err.message || 'Failed to load faculty data');
+        setError(err.message || "Failed to load faculty data");
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchFaculty();
   }, [user]);
 
@@ -47,95 +61,100 @@ export default function FacultyManagement() {
 
     try {
       // Validate email domain
-      if (!newFacultyEmail.endsWith('@jainuniversity.ac.in')) {
-        throw new Error('Only @jainuniversity.ac.in email addresses are allowed');
+      if (!newFacultyEmail.endsWith("@jainuniversity.ac.in")) {
+        throw new Error("Only @university.ac.in email addresses are allowed");
       }
 
       // Generate a random password
       const tempPassword = Math.random().toString(36).slice(-8);
-      
+
       // Create the user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newFacultyEmail,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: { role: 'faculty' }
-      });
-      
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.createUser({
+          email: newFacultyEmail,
+          password: tempPassword,
+          email_confirm: true,
+          user_metadata: { role: "faculty" },
+        });
+
       if (authError) throw authError;
-      
+
       if (authData.user) {
         // Create faculty profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            email: newFacultyEmail,
-            name: newFacultyName,
-            role: 'faculty',
-            created_at: new Date().toISOString()
-          });
-        
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: authData.user.id,
+          email: newFacultyEmail,
+          name: newFacultyName,
+          role: "faculty",
+          created_at: new Date().toISOString(),
+        });
+
         if (profileError) throw profileError;
-        
+
         // Create faculty-specific profile
         const { error: facultyProfileError } = await supabase
-          .from('faculty_profiles')
+          .from("faculty_profiles")
           .insert({
             user_id: authData.user.id,
-            department: newFacultyDepartment
+            department: newFacultyDepartment,
           });
-        
+
         if (facultyProfileError) throw facultyProfileError;
-        
+
         // Refresh the faculty list
         const facultyData = await getAllFaculty();
         setFaculty(facultyData);
-        
+
         // Reset form and close dialog
-        setNewFacultyEmail('');
-        setNewFacultyName('');
-        setNewFacultyDepartment('');
+        setNewFacultyEmail("");
+        setNewFacultyName("");
+        setNewFacultyDepartment("");
         setIsDialogOpen(false);
       }
     } catch (error: any) {
-      setFormError(error.message || 'Failed to add faculty member');
+      setFormError(error.message || "Failed to add faculty member");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleRemoveFaculty = async (facultyId: string) => {
-    if (!confirm('Are you sure you want to remove this faculty member? This action cannot be undone.')) {
+    if (
+      !confirm(
+        "Are you sure you want to remove this faculty member? This action cannot be undone."
+      )
+    ) {
       return;
     }
-    
+
     try {
       // Delete faculty-specific profile
       const { error: facultyProfileError } = await supabase
-        .from('faculty_profiles')
+        .from("faculty_profiles")
         .delete()
-        .eq('user_id', facultyId);
-      
+        .eq("user_id", facultyId);
+
       if (facultyProfileError) throw facultyProfileError;
-      
+
       // Delete base profile
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .delete()
-        .eq('id', facultyId);
-      
+        .eq("id", facultyId);
+
       if (profileError) throw profileError;
-      
+
       // Delete user from auth
-      const { error: authError } = await supabase.auth.admin.deleteUser(facultyId);
-      
+      const { error: authError } = await supabase.auth.admin.deleteUser(
+        facultyId
+      );
+
       if (authError) throw authError;
-      
+
       // Update the faculty list
-      setFaculty(faculty.filter(f => f.id !== facultyId));
+      setFaculty(faculty.filter((f) => f.id !== facultyId));
     } catch (error: any) {
-      setError(error.message || 'Failed to remove faculty member');
+      setError(error.message || "Failed to remove faculty member");
     }
   };
 
@@ -159,7 +178,8 @@ export default function FacultyManagement() {
             <DialogHeader>
               <DialogTitle>Add New Faculty</DialogTitle>
               <DialogDescription>
-                Create a new faculty account. The faculty member will receive an email to set their password.
+                Create a new faculty account. The faculty member will receive an
+                email to set their password.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddFaculty} className="space-y-4">
@@ -168,7 +188,7 @@ export default function FacultyManagement() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="faculty@jainuniversity.ac.in"
+                  placeholder="faculty@university.ac.in"
                   value={newFacultyEmail}
                   onChange={(e) => setNewFacultyEmail(e.target.value)}
                   required
@@ -192,20 +212,26 @@ export default function FacultyManagement() {
                   required
                 />
               </div>
-              {formError && <div className="text-sm text-red-500">{formError}</div>}
+              {formError && (
+                <div className="text-sm text-red-500">{formError}</div>
+              )}
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Adding...' : 'Add Faculty'}
+                  {isSubmitting ? "Adding..." : "Add Faculty"}
                 </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
-      
+
       {faculty.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-lg">
           <p className="text-gray-500">No faculty members found.</p>
@@ -219,12 +245,19 @@ export default function FacultyManagement() {
                 <CardDescription>{facultyMember.email}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-500 mb-4">Department: {facultyMember.department}</p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Department: {facultyMember.department}
+                </p>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" asChild>
                     <a href={`/faculty/${facultyMember.id}`}>View Details</a>
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleRemoveFaculty(facultyMember.id)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => handleRemoveFaculty(facultyMember.id)}
+                  >
                     Remove
                   </Button>
                 </div>

@@ -60,82 +60,41 @@ export default function StudentGroups() {
   // Fetch groups that the student is a member of
   useEffect(() => {
     const fetchStudentGroups = async () => {
+      if (!user?.id) {
+        // If no user, perhaps set error or return early
+        // For now, just log and return to prevent errors if user is not yet available
+        console.log("User not available yet for fetching groups.");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
-        console.log("Fetching student groups...");
+        setError(null);
+        console.log(`Fetching groups for student ID: ${user.id}`);
+        
+        // Assuming getGroupsByStudent fetches all groups for the student
+        // and each group object includes necessary details like name, pcl_group_no, description, and faculty_name.
+        // If faculty_name is not included by getGroupsByStudent, it would need to be fetched for each group, 
+        // or getGroupsByStudent itself should be modified to include it (preferred).
+        const fetchedGroups = await getGroupsByStudent(user.id);
 
-        // FORCE DISPLAY: Create a guaranteed group that will always show
-        // This is the exact group data from your SQL insert
-        const guaranteedGroup = {
-          id: "3e301b0d-1bdd-4881-8d18-7af06e799cca",
-          name: "test",
-          faculty_id: "505d72f6-f2ec-4a4b-a5df-3644b1ac0328",
-          department: "Life Science",
-          pcl_group_no: "PCL001",
-          description: "VERY NICE",
-          created_at: "2025-05-12 11:55:57.73496+00",
-          updated_at: "2025-05-12 11:55:57.73496+00",
-          faculty_name: "Faculty",
-        };
-
-        console.log("Setting guaranteed group:", guaranteedGroup);
-        setGroups([guaranteedGroup]);
-        setSelectedGroup(guaranteedGroup);
-
-        // Try to fetch actual group data as well
-        try {
-          // Get the student ID (either from user or hardcoded for development)
-          const studentId = user?.id || "ebc5bad1-0e33-4df1-8eb1-e22585cf21e7";
-          console.log("Fetching groups for student ID:", studentId);
-
-          // First check if the group_members entry exists
-          const { data: memberData } = await supabase
-            .from("group_members")
-            .select("*")
-            .eq("student_id", studentId)
-            .eq("group_id", "3e301b0d-1bdd-4881-8d18-7af06e799cca");
-
-          console.log("Group membership data:", memberData);
-
-          // If no membership exists, create one
-          if (!memberData || memberData.length === 0) {
-            console.log("No membership found, creating one...");
-            const { data: newMember } = await supabase
-              .from("group_members")
-              .insert({
-                group_id: "3e301b0d-1bdd-4881-8d18-7af06e799cca",
-                student_id: studentId,
-                joined_at: new Date().toISOString(),
-                status: "active",
-              })
-              .select();
-
-            console.log("Created new membership:", newMember);
-          }
-
-          // Now try to get the actual group data
-          const { data: groupData } = await supabase
-            .from("groups")
-            .select("*")
-            .eq("id", "3e301b0d-1bdd-4881-8d18-7af06e799cca")
-            .single();
-
-          if (groupData) {
-            console.log("Found actual group data:", groupData);
-            const group = {
-              ...groupData,
-              faculty_name: groupData.faculty_name || "Faculty",
-            };
-            setGroups([group]);
-            setSelectedGroup(group);
-          }
-        } catch (innerError) {
-          console.error("Error fetching actual group data:", innerError);
-          // We still have the guaranteed group, so no need to handle this error
+        if (fetchedGroups && fetchedGroups.length > 0) {
+          console.log("Fetched student groups:", fetchedGroups);
+          // Ensure faculty_name is present or defaulted for display consistency
+          const processedGroups = fetchedGroups.map(g => ({ ...g, faculty_name: g.faculty_name || 'N/A' }));
+          setGroups(processedGroups);
+          setSelectedGroup(processedGroups[0]); // Select the first group by default
+        } else {
+          console.log("No groups found for this student.");
+          setGroups([]);
+          setSelectedGroup(null);
         }
-      } catch (error) {
-        console.error("Error in fetchStudentGroups:", error);
-        // Even if there's an error, we'll still show the guaranteed group
+      } catch (error: any) {
+        console.error("Error fetching student groups:", error);
+        setError(error.message || "Failed to fetch groups.");
+        setGroups([]);
+        setSelectedGroup(null);
       } finally {
         setIsLoading(false);
       }

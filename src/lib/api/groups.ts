@@ -1,9 +1,9 @@
 import { supabase } from '../supabase';
-import { Group, GroupMember, DriveLink } from '@/types';
+import { Group, GroupMember, DriveLink, Profile, StudentProfile } from '@/types';
 
 export const createGroup = async (group: Partial<Group>) => {
   try {
-    if (!group.name || !group.faculty_id || !group.department || !group.pcl_group_no) {
+    if (!group.name || !group.faculty_id || !group.department) {
       throw new Error('Missing required fields for group creation');
     }
 
@@ -13,7 +13,11 @@ export const createGroup = async (group: Partial<Group>) => {
         name: group.name,
         faculty_id: group.faculty_id,
         department: group.department,
-        pcl_group_no: group.pcl_group_no,
+        pcl_group_no: group.pcl_group_no || null,
+        subject: group.subject || null,
+        subject_code: group.subject_code || null,
+        semester: group.semester || null,
+        year: group.year || null,
         description: group.description || null,
       })
       .select()
@@ -23,6 +27,38 @@ export const createGroup = async (group: Partial<Group>) => {
       console.error('Error creating group:', error);
       throw new Error(`Failed to create group: ${error.message}`, { cause: error });
     }
+
+    // Create default attendance settings for the new group
+    if (data && data.id) {
+      try {
+        const { error: settingsError } = await supabase
+          .from('class_attendance_settings')
+          .insert({
+            group_id: data.id,
+            faculty_id: group.faculty_id,
+            minimum_attendance_percentage: 75.00,
+            enable_low_attendance_notifications: true,
+            notification_threshold_percentage: 70.00,
+            notification_frequency_days: 7,
+            default_session_duration_minutes: 60,
+            default_qr_duration_minutes: 5,
+            default_allowed_radius_meters: 20,
+            allow_late_entry_by_default: true,
+            default_late_entry_hours: 24
+          });
+
+        if (settingsError) {
+          console.warn('Warning: Could not create default attendance settings for group:', settingsError);
+          // Don't throw error here - the group was created successfully
+        } else {
+          console.log('Default attendance settings created for group:', data.id);
+        }
+      } catch (settingsError) {
+        console.warn('Warning: Exception while creating attendance settings:', settingsError);
+        // Don't throw error here - the group was created successfully
+      }
+    }
+
     return data;
   } catch (error) {
     console.error('Unexpected error in createGroup:', error);
@@ -30,19 +66,68 @@ export const createGroup = async (group: Partial<Group>) => {
   }
 };
 
-export const getGroupById = async (id: string) => {
+export const getGroupById = async (id: string): Promise<Group | null> => {
   try {
-    const { data, error } = await supabase
+    const { data: groupData, error: groupError } = await supabase
       .from('groups')
       .select('*')
       .eq('id', id)
       .single();
     
-    if (error) {
-      console.error('Error fetching group:', error);
-      throw new Error(`Failed to fetch group: ${error.message}`, { cause: error });
+    if (groupError) {
+      console.error('Error fetching group:', groupError);
+      if (groupError.code === 'PGRST116') { // PostgREST error for ' esattamente una riga attesa, ma ne sono state trovate 0'
+        return null; // Group not found
+      }
+      throw new Error(`Failed to fetch group: ${groupError.message}`, { cause: groupError });
     }
-    return data;
+
+    if (!groupData) {
+      return null; // Group not found
+    }
+
+    let facultyName = 'Unknown Faculty';
+    if (groupData.faculty_id) {
+      // Use the same logic as getFacultyProfile - first try faculty_profiles, then fall back to profiles
+      const { data: facultyProfiles, error: facultyError } = await supabase
+        .from('faculty_profiles')
+        .select('name')
+        .eq('user_id', groupData.faculty_id);
+      
+      if (facultyError) {
+        console.warn(`Error fetching faculty profiles for user ${groupData.faculty_id}:`, facultyError.message);
+      } else if (facultyProfiles && facultyProfiles.length > 0) {
+        // If multiple profiles, use the most recent one
+        if (facultyProfiles.length > 1) {
+          console.warn(`Found ${facultyProfiles.length} faculty profiles for user ${groupData.faculty_id}. Using the first one.`);
+        }
+        facultyName = facultyProfiles[0].name || 'Faculty Member';
+      } else {
+        // Fallback to base profile
+        console.warn(`No faculty profile found for user ${groupData.faculty_id}. Checking base profile.`);
+        const { data: baseProfile, error: baseProfileError } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', groupData.faculty_id)
+          .maybeSingle();
+          
+        if (baseProfileError) {
+          console.warn(`Error fetching base profile for faculty ${groupData.faculty_id}:`, baseProfileError.message);
+          facultyName = 'Faculty Member';
+        } else if (baseProfile) {
+          // Use the same fallback logic as getFacultyProfile
+          facultyName = baseProfile.name || baseProfile.email?.split('@')[0] || 'Faculty Member';
+        } else {
+          facultyName = 'Faculty Member';
+        }
+      }
+    }
+
+    return {
+      ...groupData,
+      faculty_name: facultyName,
+    } as Group;
+
   } catch (error) {
     console.error('Unexpected error in getGroupById:', error);
     throw error instanceof Error ? error : new Error('Unexpected error in getGroupById', { cause: error });
@@ -133,6 +218,64 @@ export const getGroupCountByFaculty = async (facultyId: string): Promise<number>
   } catch (error) {
     console.error('Unexpected error in getGroupCountByFaculty:', error);
     return 0;
+  }
+};
+
+// Enhanced function to get groups with member counts and assignment counts
+export const getGroupsWithDetailsbyFaculty = async (facultyId: string): Promise<Group[]> => {
+  try {
+    if (!facultyId) {
+      console.error('getGroupsWithDetailsbyFaculty called with invalid facultyId:', facultyId);
+      return [];
+    }
+    
+    console.log('Fetching detailed groups for faculty ID:', facultyId);
+    
+    // Get groups with member counts
+    const { data: groupsData, error: groupsError } = await supabase
+      .from('groups')
+      .select(`
+        *,
+        member_count:group_members(count)
+      `)
+      .eq('faculty_id', facultyId);
+    
+    if (groupsError) {
+      console.error('Error fetching groups with details:', groupsError);
+      throw new Error(`Failed to fetch groups: ${groupsError.message}`, { cause: groupsError });
+    }
+
+    // Get assignment counts for each group
+    const groupsWithCounts = await Promise.all(
+      (groupsData || []).map(async (group: any) => {
+        try {
+          // Get assignment count
+          const { count: assignmentCount } = await supabase
+            .from('assignments')
+            .select('*', { count: 'exact', head: true })
+            .eq('group_id', group.id);
+
+          return {
+            ...group,
+            member_count: Array.isArray(group.member_count) ? group.member_count.length : 0,
+            assignment_count: assignmentCount || 0,
+          };
+        } catch (error) {
+          console.error(`Error getting counts for group ${group.id}:`, error);
+          return {
+            ...group,
+            member_count: 0,
+            assignment_count: 0,
+          };
+        }
+      })
+    );
+    
+    console.log('Enhanced groups fetched successfully:', groupsWithCounts.length);
+    return groupsWithCounts;
+  } catch (error) {
+    console.error('Unexpected error in getGroupsWithDetailsbyFaculty:', error);
+    throw error instanceof Error ? error : new Error('Unexpected error in getGroupsWithDetailsbyFaculty', { cause: error });
   }
 };
 
@@ -234,7 +377,7 @@ export const removeStudentFromGroup = async (groupId: string, studentId: string)
 };
 
 /**
- * Get all members of a group with detailed student information
+ * Get all members of a specific group with their student profile details
  * @param groupId ID of the group to get members for
  */
 export const getGroupMembers = async (groupId: string) => {
@@ -246,110 +389,78 @@ export const getGroupMembers = async (groupId: string) => {
     
     console.log('Fetching group members for group ID:', groupId);
     
-    // APPROACH: Use a simpler, more direct approach
-    
-    // 1. First get the group members
+    // Simplified approach: Get group members with their profiles in one query
     const { data: membersData, error: membersError } = await supabase
       .from('group_members')
-      .select('*')
-      .eq('group_id', groupId);
+      .select(`
+        id,
+        student_id,
+        joined_at,
+        status,
+        profiles!inner (
+          id,
+          email,
+          student_profiles (
+            id,
+            name,
+            usn,
+            class,
+            semester,
+            group_usn,
+            subject_codes
+          )
+        )
+      `)
+      .eq('group_id', groupId)
+      .eq('status', 'active');
     
     if (membersError) {
       console.error('Error fetching group members:', membersError);
-      return [];
+      throw new Error(`Failed to fetch group members: ${membersError.message}`);
     }
 
-    console.log('Group members data:', membersData?.length || 0);
-    
     if (!membersData || membersData.length === 0) {
+      console.log('No members found for group:', groupId);
       return [];
     }
     
-    // 2. Get all the student IDs from the group members
-    const studentIds = membersData.map(member => member.student_id);
+    console.log(`Found ${membersData.length} members for group:`, groupId);
     
-    // 3. Fetch profiles for these students
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .in('id', studentIds);
+    // Transform the data to match the expected GroupMember interface
+    const result: GroupMember[] = membersData.map((member: any) => {
+      const profile = member.profiles;
+      const studentProfile = profile?.student_profiles?.[0];
       
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError);
-      // Continue without profiles
-    }
-    
-    // 4. Create a map of profiles for easier lookup
-    const profilesMap: Record<string, any> = {};
-    if (profilesData) {
-      profilesData.forEach((profile: any) => {
-        profilesMap[profile.id] = profile;
-      });
-    }
-    
-    // 5. Fetch drive links for each student
-    const studentDriveLinksPromises = membersData.map(async (member: any) => {
-      const { data: driveLinks, error: driveLinksError } = await supabase
-        .from('student_drive_links')
-        .select('*')
-        .eq('group_id', groupId)
-        .eq('student_id', member.student_id);
-        
-      if (driveLinksError) {
-        console.error('Error fetching drive links for student:', driveLinksError);
-        return { studentId: member.student_id, driveLinks: [] };
-      }
-      
-      return { studentId: member.student_id, driveLinks: driveLinks || [] };
-    });
-    
-    const studentDriveLinksResults = await Promise.all(studentDriveLinksPromises);
-    
-    // Create a map of drive links by student ID
-    const driveLinksMap: Record<string, any[]> = {};
-    studentDriveLinksResults.forEach((result: { studentId: string, driveLinks: any[] }) => {
-      driveLinksMap[result.studentId] = result.driveLinks;
-    });
-    
-    // 6. Create a complete member object with all available information
-    const result = membersData.map((member: any) => {
-      // Get profile data from profiles table
-      const profile = profilesMap[member.student_id] || {};
-      
-      // Get drive links for this student
-      const studentDriveLinks = driveLinksMap[member.student_id] || [];
-      
-      // Create a complete member object with all available information
       return {
         id: member.id,
-        group_id: member.group_id,
+        group_id: groupId,
         student_id: member.student_id,
         joined_at: member.joined_at,
-        status: member.status || 'active',
-        name: 'Reyna',      // Hardcoded name from your SQL data
+        status: member.status,
         email: profile?.email || '',
-        usn: '24bsr08100',  // Hardcoded for testing
-        class: 'FSP - B',   // Hardcoded for testing
-        semester: '2',      // Hardcoded for testing
-        group_usn: 'fhfh',  // Hardcoded for testing
-        drive_links: studentDriveLinks,
+        name: studentProfile?.name || 'Unknown',
+        usn: studentProfile?.usn || '',
+        class: studentProfile?.class || '',
+        semester: studentProfile?.semester || '',
+        group_usn: studentProfile?.group_usn || '',
+        subject_codes: studentProfile?.subject_codes || [],
         student: {
-          id: member.student_id,
-          name: 'Reyna',      // Hardcoded name from your SQL data
-          email: profile?.email || '',
-          usn: '24bsr08100',  // Hardcoded for testing
-          class: 'FSP - B',   // Hardcoded for testing
-          semester: '2',      // Hardcoded for testing
-          group_usn: 'fhfh'   // Hardcoded for testing
-        }
+          id: studentProfile?.id || '',
+          name: studentProfile?.name || 'Unknown',
+          usn: studentProfile?.usn || '',
+          group_usn: studentProfile?.group_usn || '', // Added missing group_usn
+          class: studentProfile?.class || '',
+          semester: studentProfile?.semester || '',
+          email: profile?.email || '' // Added missing email
+        },
+        driveLinks: [] // We'll fetch these separately if needed
       };
     });
-    
-    console.log('Returning mapped members data:', result);
+
     return result;
   } catch (error) {
     console.error('Unexpected error in getGroupMembers:', error);
-    return [];
+    throw error instanceof Error ? error : new Error('Unexpected error in getGroupMembers', { cause: error });
   }
 };
 

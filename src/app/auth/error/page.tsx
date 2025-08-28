@@ -1,24 +1,31 @@
 // src/app/auth/error/page.tsx
 "use client";
 
-import { Suspense } from 'react';
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
-import AuthErrorDisplay from './auth-error-display';
+import AuthErrorDisplay from "./auth-error-display";
 
 function AuthErrorFallback() {
   return (
     <>
       <CardHeader>
         <CardTitle className="text-red-600">Authentication Error</CardTitle>
-        <CardDescription>
-          Loading error details...
-        </CardDescription>
+        <CardDescription>Loading error details...</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
-          <p className="text-sm text-red-700">Please wait while we load the error details.</p>
+          <p className="text-sm text-red-700">
+            Please wait while we load the error details.
+          </p>
         </div>
       </CardContent>
       <CardFooter>
@@ -39,7 +46,7 @@ export default function AuthErrorPage() {
             Academic Portal
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Jain University Academic Management System
+            University Academic Management System
           </p>
         </div>
         <Card>

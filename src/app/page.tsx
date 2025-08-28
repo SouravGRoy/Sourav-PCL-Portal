@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUserStore } from '@/lib/store';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useUserStore } from "@/lib/store";
 
 export default function Home() {
   const router = useRouter();
@@ -13,14 +19,14 @@ export default function Home() {
   useEffect(() => {
     // If user is already logged in, redirect to their dashboard
     if (user) {
-      if (role === 'student') {
-        router.push('/dashboard/student');
-      } else if (role === 'faculty') {
-        router.push('/dashboard/faculty');
-      } else if (role === 'superadmin') {
-        router.push('/dashboard/superadmin');
+      if (role === "student") {
+        router.push("/dashboard/student");
+      } else if (role === "faculty") {
+        router.push("/dashboard/faculty");
+      } else if (role === "superadmin") {
+        router.push("/dashboard/superadmin");
       } else {
-        router.push('/profile/complete');
+        router.push("/profile/complete");
       }
     }
   }, [user, role, router]);
@@ -31,7 +37,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Academic Portal</h1>
+              <h1 className="text-xl font-bold text-gray-900">
+                Academic Portal
+              </h1>
             </div>
             <div className="flex items-center">
               <Button asChild variant="outline" className="mr-2">
@@ -44,24 +52,27 @@ export default function Home() {
           </div>
         </div>
       </header>
-      
+
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-              Jain University Academic Portal
+              University Academic Portal
             </h1>
             <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
-              A comprehensive platform for academic management between faculty and students
+              A comprehensive platform for academic management between faculty
+              and students
             </p>
           </div>
-          
+
           <div className="mt-10">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               <Card>
                 <CardHeader>
                   <CardTitle>For Students</CardTitle>
-                  <CardDescription>Manage your academic journey</CardDescription>
+                  <CardDescription>
+                    Manage your academic journey
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 space-y-2 text-gray-600">
@@ -75,11 +86,13 @@ export default function Home() {
                   </Button>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>For Faculty</CardTitle>
-                  <CardDescription>Manage your students and courses</CardDescription>
+                  <CardDescription>
+                    Manage your students and courses
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 space-y-2 text-gray-600">
@@ -93,7 +106,7 @@ export default function Home() {
                   </Button>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>For Administrators</CardTitle>
@@ -114,11 +127,12 @@ export default function Home() {
           </div>
         </div>
       </main>
-      
+
       <footer className="bg-white">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} Jain University Academic Portal. All rights reserved.
+            © {new Date().getFullYear()} University Academic Portal. All rights
+            reserved.
           </p>
         </div>
       </footer>

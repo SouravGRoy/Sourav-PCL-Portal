@@ -14,7 +14,7 @@ export const signIn = async (email: string, password: string) => {
 export const signUp = async (email: string, password: string, role: UserRole) => {
   // Validate university email domain
   if (!email.endsWith('@jainuniversity.ac.in')) {
-    throw new Error('Only @jainuniversity.ac.in email addresses are allowed');
+    throw new Error('Only @university.ac.in email addresses are allowed');
   }
   
   // Validate password strength

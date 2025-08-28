@@ -1,120 +1,221 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useUserStore } from '@/lib/store';
-import { getProfileById, updateProfile } from '@/lib/api/profiles';
-import { Profile, StudentProfile, FacultyProfile } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useUserStore } from "@/lib/store";
+import { getProfileById, updateProfile } from "@/lib/api/profiles";
+import { Profile, StudentProfile, FacultyProfile } from "@/types";
+import { supabase } from "@/lib/supabase";
 
 export default function UserProfileComponent() {
   const { user, role } = useUserStore();
   const [profile, setProfile] = useState<any | null>(null);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Student-specific fields
-  const [usn, setUsn] = useState('');
-  const [className, setClassName] = useState('');
-  const [semester, setSemester] = useState('');
-  const [subjectCodes, setSubjectCodes] = useState('');
-  
+  const [usn, setUsn] = useState("");
+  const [className, setClassName] = useState("");
+  const [semester, setSemester] = useState("");
+  const [subjectCodes, setSubjectCodes] = useState("");
+
   // Faculty-specific fields
-  const [department, setDepartment] = useState('');
+  const [department, setDepartment] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
-      
+
       try {
         // Fetch base profile
         const profileData = await getProfileById(user.id);
         setProfile(profileData);
-        setName(profileData.name);
-        
-        // Fetch role-specific profile data
-        if (role === 'student') {
-          const { data: studentData } = await supabase
-            .from('student_profiles')
-            .select('*')
-            .eq('user_id', user.id)
+
+        // Fetch role-specific profile data and get name from there
+        if (role === "student") {
+          console.log("Fetching student profile for user:", user.id);
+          const { data: studentData, error: studentError } = await supabase
+            .from("student_profiles")
+            .select("*")
+            .eq("user_id", user.id)
             .single();
-          
+
+          console.log(
+            "Student profile data:",
+            studentData,
+            "Error:",
+            studentError
+          );
           if (studentData) {
-            setUsn(studentData.usn || '');
-            setClassName(studentData.class || '');
-            setSemester(studentData.semester || '');
-            setSubjectCodes(studentData.subject_codes?.join(', ') || '');
+            setName(studentData.name || "");
+            setUsn(studentData.usn || "");
+            setClassName(studentData.class || "");
+            setSemester(studentData.semester || "");
+            setSubjectCodes(studentData.subject_codes?.join(", ") || "");
           }
-        } else if (role === 'faculty') {
+        } else if (role === "faculty") {
           const { data: facultyData } = await supabase
-            .from('faculty_profiles')
-            .select('*')
-            .eq('user_id', user.id)
+            .from("faculty_profiles")
+            .select("*")
+            .eq("user_id", user.id)
             .single();
-          
+
           if (facultyData) {
-            setDepartment(facultyData.department || '');
+            setName(facultyData.name || "");
+            setDepartment(facultyData.department || "");
           }
         }
       } catch (err: any) {
-        setError(err.message || 'Failed to load profile');
+        setError(err.message || "Failed to load profile");
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchProfile();
   }, [user, role]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
-    
+
     setIsSaving(true);
     setError(null);
-    
+
     try {
-      // Update base profile
-      await updateProfile(user.id, { name });
-      
-      // Update role-specific profile
-      if (role === 'student') {
-        const { error } = await supabase
-          .from('student_profiles')
+      // Update role-specific profile (name is stored in role-specific tables, not base profiles table)
+      if (role === "student") {
+        console.log("Updating student profile for user:", user.id);
+        console.log("Update data:", {
+          name,
+          usn,
+          className,
+          semester,
+          subjectCodes,
+        });
+
+        // First try to update, if no rows affected, then insert
+        const { data: updateData, error: updateError } = await supabase
+          .from("student_profiles")
           .update({
+            name,
             usn,
             class: className,
             semester,
-            subject_codes: subjectCodes.split(',').map(code => code.trim())
+            subject_codes: subjectCodes.split(",").map((code) => code.trim()),
           })
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
-      } else if (role === 'faculty') {
-        console.log('Updating faculty profile with name:', name, 'and department:', department);
-        
-        const { error } = await supabase
-          .from('faculty_profiles')
+          .eq("user_id", user.id)
+          .select();
+
+        console.log("Update result:", { data: updateData, error: updateError });
+
+        // If update didn't affect any rows, the profile doesn't exist, so insert it
+        if (!updateError && (!updateData || updateData.length === 0)) {
+          console.log("No existing student profile found, creating new one");
+          const { data: insertData, error: insertError } = await supabase
+            .from("student_profiles")
+            .insert({
+              user_id: user.id,
+              name,
+              usn,
+              class: className,
+              semester,
+              subject_codes: subjectCodes.split(",").map((code) => code.trim()),
+            })
+            .select();
+
+          console.log("Insert result:", {
+            data: insertData,
+            error: insertError,
+          });
+          if (insertError) throw insertError;
+        } else if (updateError) {
+          throw updateError;
+        }
+      } else if (role === "faculty") {
+        console.log(
+          "Updating faculty profile with name:",
+          name,
+          "and department:",
+          department
+        );
+
+        // First try to update, if no rows affected, then insert
+        const { data: updateData, error: updateError } = await supabase
+          .from("faculty_profiles")
           .update({
-            name, // Add name field to faculty profile update
-            department
+            name,
+            department,
           })
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
+          .eq("user_id", user.id)
+          .select();
+
+        console.log("Faculty update result:", {
+          data: updateData,
+          error: updateError,
+        });
+
+        // If update didn't affect any rows, the profile doesn't exist, so insert it
+        if (!updateError && (!updateData || updateData.length === 0)) {
+          console.log("No existing faculty profile found, creating new one");
+          const { data: insertData, error: insertError } = await supabase
+            .from("faculty_profiles")
+            .insert({
+              user_id: user.id,
+              name,
+              department,
+            })
+            .select();
+
+          console.log("Faculty insert result:", {
+            data: insertData,
+            error: insertError,
+          });
+          if (insertError) throw insertError;
+        } else if (updateError) {
+          throw updateError;
+        }
       }
-      
+
       setIsEditing(false);
-      
+
       // Refresh profile data
       const updatedProfile = await getProfileById(user.id);
       setProfile(updatedProfile);
+
+      // Refresh role-specific data to get updated name
+      if (role === "student") {
+        const { data: studentData } = await supabase
+          .from("student_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (studentData) {
+          setName(studentData.name || "");
+        }
+      } else if (role === "faculty") {
+        const { data: facultyData } = await supabase
+          .from("faculty_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (facultyData) {
+          setName(facultyData.name || "");
+        }
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
+      setError(err.message || "Failed to update profile");
     } finally {
       setIsSaving(false);
     }
@@ -140,14 +241,16 @@ export default function UserProfileComponent() {
           <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
         ) : (
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleSaveProfile} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         )}
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Basic Information</CardTitle>
@@ -160,11 +263,13 @@ export default function UserProfileComponent() {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  value={profile.email}
+                  value={profile?.email || ""}
                   disabled
                   className="mt-1"
                 />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Email cannot be changed
+                </p>
               </div>
               <div>
                 <Label htmlFor="name">Full Name</Label>
@@ -181,17 +286,19 @@ export default function UserProfileComponent() {
               <Label htmlFor="role">Role</Label>
               <Input
                 id="role"
-                value={role ? role.charAt(0).toUpperCase() + role.slice(1) : ''}
+                value={role ? role.charAt(0).toUpperCase() + role.slice(1) : ""}
                 disabled
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">Role cannot be changed</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Role cannot be changed
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
-      
-      {role && role === 'student' && (
+
+      {role && role === "student" && (
         <Card>
           <CardHeader>
             <CardTitle>Academic Information</CardTitle>
@@ -233,7 +340,9 @@ export default function UserProfileComponent() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="subjectCodes">Subject Codes (comma-separated)</Label>
+                  <Label htmlFor="subjectCodes">
+                    Subject Codes (comma-separated)
+                  </Label>
                   <Input
                     id="subjectCodes"
                     value={subjectCodes}
@@ -247,8 +356,8 @@ export default function UserProfileComponent() {
           </CardContent>
         </Card>
       )}
-      
-      {role && role === 'faculty' && (
+
+      {role && role === "faculty" && (
         <Card>
           <CardHeader>
             <CardTitle>Department Information</CardTitle>
@@ -268,7 +377,7 @@ export default function UserProfileComponent() {
           </CardContent>
         </Card>
       )}
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Account Security</CardTitle>

@@ -32,9 +32,7 @@ export default function ForgotPasswordPage() {
     try {
       // Validate email domain
       if (!email.endsWith("@jainuniversity.ac.in")) {
-        throw new Error(
-          "Only @jainuniversity.ac.in email addresses are allowed"
-        );
+        throw new Error("Only @university.ac.in email addresses are allowed");
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -61,15 +59,15 @@ export default function ForgotPasswordPage() {
             Academic Portal
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Jain University Academic Management System
+            University Academic Management System
           </p>
         </div>
         <Card>
           <CardHeader>
             <CardTitle>Reset your password</CardTitle>
             <CardDescription>
-              Enter your email address and we&apos;ll send you a link to reset your
-              password.
+              Enter your email address and we&apos;ll send you a link to reset
+              your password.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -88,16 +86,12 @@ export default function ForgotPasswordPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@jainuniversity.ac.in"
+                    placeholder="you@university.ac.in"
                     required
                   />
                 </div>
                 {error && <div className="text-sm text-red-500">{error}</div>}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Sending..." : "Send Reset Link"}
                 </Button>
               </form>

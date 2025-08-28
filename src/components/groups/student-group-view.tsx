@@ -5,7 +5,13 @@ import { useUserStore } from "@/lib/store";
 import { useToast } from "@/components/ui/use-toast";
 import { Group } from "@/types";
 import { GroupsAPI } from "@/lib/api";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import StudentDriveLinks from "./student-drive-links";
 
 export default function StudentGroupView() {
@@ -26,7 +32,7 @@ export default function StudentGroupView() {
 
         const studentGroups = await GroupsAPI.getStudentGroups(user.id);
         setGroups(studentGroups || []);
-        
+
         // Auto-select the first group if there's only one
         if (studentGroups && studentGroups.length === 1) {
           setSelectedGroup(studentGroups[0]);
@@ -53,7 +59,7 @@ export default function StudentGroupView() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Your Groups</h2>
-      
+
       {isLoading ? (
         <div className="flex items-center justify-center h-32">
           <p>Loading your groups...</p>
@@ -67,7 +73,7 @@ export default function StudentGroupView() {
           <div className="md:col-span-1">
             <div className="space-y-4">
               {groups.map((group) => (
-                <Card 
+                <Card
                   key={group.id}
                   onClick={() => handleSelectGroup(group)}
                   className={`cursor-pointer transition-colors ${
@@ -79,7 +85,7 @@ export default function StudentGroupView() {
                     <CardDescription>
                       Department: {group.department}
                       <br />
-                      PCL Group: {group.pcl_group_no}
+                      Group: {group.pcl_group_no}
                     </CardDescription>
                   </CardHeader>
                 </Card>

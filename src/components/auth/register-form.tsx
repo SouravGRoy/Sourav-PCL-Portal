@@ -38,9 +38,7 @@ export default function RegisterForm() {
     try {
       // Validate email domain
       if (!email.endsWith("@jainuniversity.ac.in")) {
-        throw new Error(
-          "Only @jainuniversity.ac.in email addresses are allowed"
-        );
+        throw new Error("Only @university.ac.in email addresses are allowed");
       }
 
       // Validate password match
@@ -63,7 +61,7 @@ export default function RegisterForm() {
 
       if (user) {
         setUser(user);
-        
+
         // Check if email confirmation is required
         if (user.email_confirmed_at) {
           // Email already confirmed (happens in development sometimes)
@@ -103,16 +101,21 @@ export default function RegisterForm() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+            suppressHydrationWarning
+          >
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@jainuniversity.ac.in"
+                placeholder="you@university.ac.in"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                suppressHydrationWarning
               />
             </div>
             <div className="space-y-2">
@@ -123,6 +126,7 @@ export default function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                suppressHydrationWarning
               />
             </div>
             <div className="space-y-2">
@@ -133,6 +137,7 @@ export default function RegisterForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                suppressHydrationWarning
               />
             </div>
             <div className="space-y-2">

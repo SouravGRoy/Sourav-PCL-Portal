@@ -19,16 +19,42 @@ const getFacultyName = async (facultyId?: string): Promise<string | null> => {
   }
 
   try {
-    const { data, error } = await supabase
+    // Attempt 1: Fetch from faculty_profiles using facultyId as user_id
+    const { data: facultyProfileData, error: facultyProfileError } = await supabase
+      .from('faculty_profiles')
+      .select('name, department') // Fetch department too for context if needed later
+      .eq('user_id', facultyId)
+      // .eq('department', department) // We don't have department here, so we might get multiple if faculty is in multiple depts
+      .limit(1) // Take the first one if multiple, or consider a more specific query if department context is available
+      .maybeSingle(); // Use maybeSingle to avoid error if not found
+
+    if (facultyProfileError) {
+      console.warn(`Error fetching from faculty_profiles for user_id ${facultyId}:`, facultyProfileError.message);
+      // Do not throw yet, proceed to fallback
+    }
+
+    if (facultyProfileData && facultyProfileData.name) {
+      return facultyProfileData.name;
+    }
+
+    // Attempt 2: Fallback to profiles table using facultyId as id
+    console.log(`Faculty name not found in faculty_profiles for ${facultyId}, trying profiles table.`);
+    const { data: generalProfileData, error: generalProfileError } = await supabase
       .from('profiles')
       .select('name')
       .eq('id', facultyId)
-      .single();
+      .single(); // single() is okay here as profiles should have one entry per id
 
-    if (error) throw error;
-    return data?.name || null;
-  } catch (error) {
-    console.error('Error fetching faculty name:', error);
+    if (generalProfileError) {
+      // This is a more critical error if both attempts fail
+      console.error(`Error fetching faculty name from profiles for id ${facultyId}:`, generalProfileError.message, generalProfileError);
+      throw generalProfileError; // Re-throw to be caught by the outer catch
+    }
+    return generalProfileData?.name || null;
+
+  } catch (error: any) {
+    // Catch any error from the try block (e.g., re-thrown generalProfileError)
+    console.error('Error in getFacultyName for facultyId:', facultyId, error.message || error);
     return null;
   }
 };
@@ -256,17 +282,42 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
       
       // Get drive links for this student
       const studentDriveLinks = driveLinksMap[member.student_id] || [];
+
+      // --- BEGIN DIAGNOSTIC LOGGING (supabase/groups.ts) ---
+      console.log(`[supabase/getGroupMembers] Processing member.student_id: ${member.student_id}`);
+      if (studentProfile && Object.keys(studentProfile).length > 0) {
+        console.log(`[supabase/getGroupMembers] Fetched studentProfile object for ${member.student_id}:`, JSON.stringify(studentProfile, null, 2));
+      } else {
+        console.log(`[supabase/getGroupMembers] No studentProfile data found in studentProfilesMap for ${member.student_id}.`);
+      }
+      if (profile && Object.keys(profile).length > 0) {
+        console.log(`[supabase/getGroupMembers] Fetched profile object for ${member.student_id}:`, JSON.stringify(profile, null, 2));
+      } else {
+        console.log(`[supabase/getGroupMembers] No profile data found in profilesMap for ${member.student_id}.`);
+      }
+
+      // Determine the name: student_profiles.name takes precedence, then profiles.name
+      let resolvedName = 'Unknown';
+      if (studentProfile?.name) {
+        resolvedName = studentProfile.name;
+      } else if (profile?.name) {
+        resolvedName = profile.name;
+      }
+      
+      const resolvedUsn = studentProfile?.usn || 'N/A';
+      console.log(`[supabase/getGroupMembers] For student_id ${member.student_id}, resolved name: '${resolvedName}', USN: '${resolvedUsn}'`);
+      // --- END DIAGNOSTIC LOGGING (supabase/groups.ts) ---
       
       return {
-        id: member.id,
+        id: member.id, // group_members.id
         group_id: member.group_id,
         student_id: member.student_id,
-        name: profile.name || 'Unknown',
-        usn: studentProfile.usn || '24bsr08100', // Fallback to example if not found
-        group_usn: studentProfile.group_usn || 'fhfh',
-        class: studentProfile.class || 'FSP - B',
-        semester: studentProfile.semester || '2',
-        email: profile.email || '24bsr08100@jainuniversity.ac.in',
+        name: resolvedName,
+        usn: resolvedUsn,
+        class: studentProfile?.class || 'N/A',
+        semester: studentProfile?.semester || 'N/A',
+        email: profile?.email || 'N/A',
+        group_usn: studentProfile?.group_usn || 'N/A',
         drive_links: studentDriveLinks.map((link: any) => ({
           id: link.id,
           group_id: link.group_id,
@@ -276,20 +327,20 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
           created_at: link.created_at,
           updated_at: link.updated_at
         })),
-        joined_at: member.joined_at,
+        joined_at: member.created_at, // Assuming 'created_at' from group_members is join date
         student: {
           id: member.student_id,
-          name: profile.name || 'Unknown',
-          usn: studentProfile.usn || '24bsr08100',
-          group_usn: studentProfile.group_usn || 'fhfh',
-          class: studentProfile.class || 'FSP - B',
-          semester: studentProfile.semester || '2',
-          email: profile.email || '24bsr08100@jainuniversity.ac.in'
+          name: resolvedName,
+          usn: resolvedUsn,
+          group_usn: studentProfile?.group_usn || 'N/A',
+          class: studentProfile?.class || 'N/A',
+          semester: studentProfile?.semester || 'N/A',
+          email: profile?.email || 'N/A',
         }
       };
     });
 
-    console.log('Returning transformed members:', transformedMembers);
+    console.log('[supabase/getGroupMembers] Returning transformed members:', JSON.stringify(transformedMembers, null, 2));
     return transformedMembers;
   } catch (error) {
     console.error('Error in getGroupMembers:', error);
