@@ -1,46 +1,54 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUserStore } from '@/lib/store';
-import { createAssignment } from '@/lib/api/assignments';
-import { getGroupsByFaculty } from '@/lib/api/groups';
-import { Group } from '@/types';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useUserStore } from "@/lib/store";
+import { createAssignment } from "@/lib/api/assignments";
+import { getGroupsByFaculty } from "@/lib/api/groups";
+import { Group } from "@/types";
 
 interface CreateAssignmentFormProps {
   groupId?: string;
 }
 
-export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [selectedGroupId, setSelectedGroupId] = useState(groupId || '');
+export default function CreateAssignmentForm({
+  groupId,
+}: CreateAssignmentFormProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [selectedGroupId, setSelectedGroupId] = useState(groupId || "");
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const router = useRouter();
   const { user } = useUserStore();
 
   useEffect(() => {
     const fetchGroups = async () => {
       if (!user) return;
-      
+
       try {
         const groupsData = await getGroupsByFaculty(user.id);
         setGroups(groupsData);
-        
+
         if (!groupId && groupsData.length > 0) {
           setSelectedGroupId(groupsData[0].id);
         }
       } catch (err: any) {
-        setError(err.message || 'Failed to load groups');
+        setError(err.message || "Failed to load groups");
       }
     };
-    
+
     fetchGroups();
   }, [user, groupId]);
 
@@ -51,11 +59,11 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
 
     try {
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
       if (!selectedGroupId) {
-        throw new Error('Please select a group');
+        throw new Error("Please select a group");
       }
 
       await createAssignment({
@@ -63,12 +71,13 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
         description,
         group_id: selectedGroupId,
         due_date: dueDate,
-        created_at: new Date().toISOString(),
+        type: "individual" as const,
+        max_score: 100,
       });
-      
+
       router.push(`/groups/${selectedGroupId}/assignments`);
     } catch (error: any) {
-      setError(error.message || 'Failed to create assignment');
+      setError(error.message || "Failed to create assignment");
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +87,9 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Create New Assignment</CardTitle>
-        <CardDescription>Add a new assignment for your students</CardDescription>
+        <CardDescription>
+          Add a new assignment for your students
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -91,7 +102,7 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <textarea
@@ -102,7 +113,7 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="dueDate">Due Date</Label>
             <Input
@@ -113,7 +124,7 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
               required
             />
           </div>
-          
+
           {!groupId && (
             <div className="space-y-2">
               <Label htmlFor="group">Group</Label>
@@ -133,11 +144,11 @@ export default function CreateAssignmentForm({ groupId }: CreateAssignmentFormPr
               </select>
             </div>
           )}
-          
+
           {error && <div className="text-sm text-red-500">{error}</div>}
-          
+
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creating...' : 'Create Assignment'}
+            {isLoading ? "Creating..." : "Create Assignment"}
           </Button>
         </form>
       </CardContent>

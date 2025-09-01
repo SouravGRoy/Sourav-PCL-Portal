@@ -494,7 +494,7 @@ export default function CreateAssignmentDialog({
                       </p>
                       <p>
                         With {totalStudents} students and group size of{" "}
-                        {form.groupSize}, you'll create{" "}
+                        {form.groupSize}, you&apos;ll create{" "}
                         {Math.ceil(totalStudents / form.groupSize)} groups (A,
                         B, C, etc.).
                       </p>

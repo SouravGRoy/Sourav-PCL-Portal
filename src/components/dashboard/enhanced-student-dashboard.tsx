@@ -258,7 +258,7 @@ export default function EnhancedStudentDashboard() {
             Welcome back, {profile?.name || "Student"}!
           </h1>
           <p className="text-gray-600">
-            Here's an overview of your academic progress
+            Here&apos;s an overview of your academic progress
           </p>
         </div>
         <div className="text-right">
@@ -353,7 +353,9 @@ export default function EnhancedStudentDashboard() {
               <div className="text-center py-8">
                 <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
                 <p className="text-gray-500">No upcoming deadlines!</p>
-                <p className="text-sm text-gray-400">You're all caught up</p>
+                <p className="text-sm text-gray-400">
+                  You&apos;re all caught up
+                </p>
               </div>
             ) : (
               <div className="space-y-4">

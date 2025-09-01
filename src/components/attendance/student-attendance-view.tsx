@@ -387,7 +387,8 @@ export default function StudentAttendanceView({
                         Good Standing
                       </p>
                       <p className="text-gray-600">
-                        You're meeting the attendance requirements. Keep it up!
+                        You&apos;re meeting the attendance requirements. Keep it
+                        up!
                       </p>
                     </div>
                   )}
@@ -694,7 +695,8 @@ export default function StudentAttendanceView({
                   </div>
                   <h3 className="font-medium">Location Verified</h3>
                   <p className="text-sm text-gray-600">
-                    Your location is checked to ensure you're in the classroom
+                    Your location is checked to ensure you&apos;re in the
+                    classroom
                   </p>
                 </div>
 

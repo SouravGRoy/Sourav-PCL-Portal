@@ -96,7 +96,7 @@ export default function FacultySubmissionsList({
               No submissions yet
             </h3>
             <p className="text-gray-500">
-              Students haven't submitted this assignment yet.
+              Students haven&apos;t submitted this assignment yet.
             </p>
           </CardContent>
         </Card>

@@ -1277,8 +1277,8 @@ export default function GroupDetail({
                         !searchLoading &&
                         searchResults.length === 0 && (
                           <div className="text-center py-4 text-muted-foreground">
-                            No students found matching "{searchTerm}". Try
-                            searching with a different USN or email.
+                            No students found matching &quot;{searchTerm}&quot;.
+                            Try searching with a different USN or email.
                           </div>
                         )}
                     </div>

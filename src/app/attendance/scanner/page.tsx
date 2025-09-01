@@ -66,7 +66,7 @@ export default function QRScannerPage() {
                 Point your camera at the QR code displayed by your instructor
               </p>
               <p className="mt-2 text-xs">
-                Once scanned, you'll be redirected to mark your attendance
+                Once scanned, you&apos;ll be redirected to mark your attendance
               </p>
             </div>
           </CardContent>

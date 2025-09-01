@@ -1102,13 +1102,15 @@ export const getClassAttendanceSettings = async (groupId: string): Promise<Class
       throw new Error('Group does not exist');
     }
 
-    let { data: settings, error } = await supabase
+    const { data: initialSettings, error: initialError } = await supabase
       .from('class_attendance_settings')
       .select('*')
       .eq('group_id', groupId)
       .single();
 
-    if (error && error.code === 'PGRST116') {
+    let settings = initialSettings;
+
+    if (initialError && initialError.code === 'PGRST116') {
       // Create default settings if they don't exist
       const defaultSettings = {
         group_id: groupId,
@@ -1161,13 +1163,13 @@ export const getClassAttendanceSettings = async (groupId: string): Promise<Class
         } as ClassAttendanceSettings;
       }
       settings = newSettings;
-    } else if (error) {
+    } else if (initialError) {
       console.error('Error fetching attendance settings:', {
-        error: error,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
+        error: initialError,
+        message: initialError.message,
+        details: initialError.details,
+        hint: initialError.hint,
+        code: initialError.code
       });
       
       // Return default settings if there's a database error
@@ -1188,8 +1190,6 @@ export const getClassAttendanceSettings = async (groupId: string): Promise<Class
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       } as ClassAttendanceSettings;
-    } else {
-      settings = settings;
     }
 
     if (!settings) {
@@ -1553,7 +1553,7 @@ export const getGroupAttendanceStats = async (groupId: string) => {
 
     // Calculate attendance rate
     let totalPresentRecords = 0;
-    let totalPossibleAttendance = totalSessions * totalStudents;
+    const totalPossibleAttendance = totalSessions * totalStudents;
 
     sessions?.forEach(session => {
       const presentCount = session.attendance_records?.filter(

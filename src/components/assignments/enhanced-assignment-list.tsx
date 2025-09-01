@@ -127,7 +127,7 @@ function GroupInfoModal({
         <DialogHeader>
           <DialogTitle>Group Information</DialogTitle>
           <DialogDescription>
-            Your group for "{assignment.title}"
+            Your group for &quot;{assignment.title}&quot;
           </DialogDescription>
         </DialogHeader>
 
@@ -169,7 +169,7 @@ function GroupInfoModal({
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p>You haven't been assigned to a group yet.</p>
+            <p>You haven&apos;t been assigned to a group yet.</p>
             <p className="text-sm mt-2">
               Groups will be formed by your instructor.
             </p>

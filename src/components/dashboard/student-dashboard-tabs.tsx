@@ -160,7 +160,7 @@ export default function StudentDashboardTabs() {
         .eq("user_id", user.id)
         .single();
 
-      let submissionOverview = null;
+      const submissionOverview = null;
       // Student submission overview will be calculated from the submissions data
       // No need for a separate API call
 
@@ -291,7 +291,7 @@ export default function StudentDashboardTabs() {
       // Calculate real attendance data across all groups
       let totalSessions = 0;
       let totalAttended = 0;
-      let allAttendanceRecords: AttendanceRecord[] = [];
+      const allAttendanceRecords: AttendanceRecord[] = [];
 
       // Fetch attendance data for each group
       for (const group of groupsData) {
@@ -771,7 +771,7 @@ export default function StudentDashboardTabs() {
                   No Classes Yet
                 </h3>
                 <p className="text-gray-500 text-center mb-4">
-                  You haven't joined any classes yet. Join classes to see
+                  You haven&apos;t joined any classes yet. Join classes to see
                   assignments and track your progress.
                 </p>
                 <Button asChild>

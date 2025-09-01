@@ -412,7 +412,7 @@ export default function EnhancedStudentAssignments() {
                   All caught up!
                 </h3>
                 <p className="text-gray-500 text-center">
-                  You don't have any pending assignments right now.
+                  You don&apos;t have any pending assignments right now.
                 </p>
               </CardContent>
             </Card>

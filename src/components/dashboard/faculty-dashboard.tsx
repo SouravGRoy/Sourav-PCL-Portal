@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -1089,10 +1090,10 @@ export default function FacultyDashboard() {
                     variant="outline"
                     asChild
                   >
-                    <a href="/groups/manage">
+                    <Link href="/groups/manage">
                       <Users className="h-4 w-4 mr-2" />
                       Manage Groups
-                    </a>
+                    </Link>
                   </Button>
                   <Button
                     className="w-full justify-start"

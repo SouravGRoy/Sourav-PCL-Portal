@@ -2803,19 +2803,20 @@ function SessionDetailView({ session }: { session: any }) {
                   {editingStudent?.status === "present" &&
                   editStatus === "absent" ? (
                     <div>
-                      <strong>Important:</strong> You're changing status from
-                      Present to Absent. This might be for disciplinary reasons.
-                      Please provide a clear reason.
+                      <strong>Important:</strong> You&apos;re changing status
+                      from Present to Absent. This might be for disciplinary
+                      reasons. Please provide a clear reason.
                     </div>
                   ) : editingStudent?.status === "absent" &&
                     editStatus === "present" ? (
                     <div>
-                      <strong>Note:</strong> You're marking an absent student as
-                      present. This might be for medical or other valid reasons.
+                      <strong>Note:</strong> You&apos;re marking an absent
+                      student as present. This might be for medical or other
+                      valid reasons.
                     </div>
                   ) : (
                     <div>
-                      This change will override the student's original
+                      This change will override the student&apos;s original
                       attendance status and will be logged with your faculty ID
                       and timestamp.
                     </div>

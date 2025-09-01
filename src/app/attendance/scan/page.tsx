@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ interface LocationData {
   accuracy: number;
 }
 
-export default function AttendanceScanPage() {
+function AttendanceScanPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useUserStore();
@@ -447,5 +447,20 @@ export default function AttendanceScanPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export default function AttendanceScanPageWrapper() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <AttendanceScanPage />
+    </Suspense>
   );
 }
