@@ -164,19 +164,27 @@ export default function StudentDashboardTabs() {
       // Student submission overview will be calculated from the submissions data
       // No need for a separate API call
 
-      // Transform groups data with mock additional details
-      const groupsWithDetails: GroupWithDetails[] = groupsData.map((group) => ({
-        ...group,
-        faculty_name: "Dr. Faculty Name", // This would come from a join in real implementation
-        total_assignments: Math.floor(Math.random() * 10) + 5,
-        pending_assignments: Math.floor(Math.random() * 3),
-        average_grade: Math.floor(Math.random() * 20) + 80,
-        last_activity: new Date(
-          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-      }));
+      // Transform groups data with real assignment statistics
+      const groupsWithDetails: GroupWithDetails[] = groupsData.map((group) => {
+        // Filter assignments for this specific group
+        const groupAssignments = assignmentsData.filter(
+          (assignment) => assignment.group_id === group.id
+        );
 
-      setGroups(groupsWithDetails);
+        // Calculate real assignment statistics for this group
+        const totalAssignments = groupAssignments.length;
+
+        // We'll calculate pending assignments after we get submission data
+        // For now, set defaults that will be updated below
+        return {
+          ...group,
+          faculty_name: group.faculty_name || "Faculty", // Use existing faculty name or fallback
+          total_assignments: totalAssignments,
+          pending_assignments: 0, // Will be calculated below
+          average_grade: 0, // Will be calculated below
+          last_activity: new Date().toISOString(), // Current time as fallback
+        };
+      });
 
       // Transform assignments data with real submission status
       const now = new Date();
@@ -266,6 +274,40 @@ export default function StudentDashboardTabs() {
       }
 
       setAssignments(assignmentOverview);
+
+      // Update groups with real assignment statistics based on actual submission data
+      const updatedGroupsWithDetails = groupsWithDetails.map((group) => {
+        const groupAssignmentOverview = assignmentOverview.filter(
+          (assignment) => assignment.groupName === group.name
+        );
+
+        const pendingAssignments = groupAssignmentOverview.filter(
+          (assignment) =>
+            assignment.status === "pending" || assignment.status === "overdue"
+        ).length;
+
+        const gradedGroupAssignments = groupAssignmentOverview.filter(
+          (assignment) =>
+            assignment.status === "graded" && assignment.score !== undefined
+        );
+
+        const averageGrade =
+          gradedGroupAssignments.length > 0
+            ? gradedGroupAssignments.reduce(
+                (sum, assignment) =>
+                  sum + (assignment.score! / assignment.maxScore) * 100,
+                0
+              ) / gradedGroupAssignments.length
+            : 0;
+
+        return {
+          ...group,
+          pending_assignments: pendingAssignments,
+          average_grade: Math.round(averageGrade),
+        };
+      });
+
+      setGroups(updatedGroupsWithDetails);
 
       // Calculate stats
       const pendingCount = assignmentOverview.filter(
