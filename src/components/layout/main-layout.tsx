@@ -72,39 +72,39 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     </Link>
                     {role === "faculty" && (
                       <>
-                        <Link
+                        {/* <Link
                           href="/groups"
                           className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                         >
                           Groups
-                        </Link>
+                        </Link> */}
                         <Link
-                          href="/assignments"
+                          href="/mcq-test"
                           className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                         >
-                          Assignments
+                          MCQ Tests
+                        </Link>
+                        <Link
+                          href="/feedback"
+                          className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                        >
+                          Feedback
                         </Link>
                       </>
                     )}
                     {role === "student" && (
                       <>
                         <Link
-                          href="/groups/join"
+                          href="/mcq-test"
                           className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                         >
-                          Join Groups
+                          MCQ Tests
                         </Link>
                         <Link
-                          href="/assignments/my"
+                          href="/feedback"
                           className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                         >
-                          My Assignments
-                        </Link>
-                        <Link
-                          href="/submissions"
-                          className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                        >
-                          Submissions
+                          Feedback
                         </Link>
                       </>
                     )}
@@ -204,7 +204,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   </Link>
                   {role === "faculty" && (
                     <>
-                      <Link
+                      {/* <Link
                         href="/groups"
                         className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 block px-3 py-2 rounded-md text-base font-medium"
                         onClick={() => setMobileMenuOpen(false)}
@@ -217,6 +217,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Assignments
+                      </Link> */}
+                      <Link
+                        href="/mcq-test"
+                        className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        MCQ Tests
+                      </Link>
+                      <Link
+                        href="/feedback"
+                        className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Feedback
                       </Link>
                     </>
                   )}
@@ -235,6 +249,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         My Assignments
+                      </Link>
+                      <Link
+                        href="/mcq-test"
+                        className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        MCQ Tests
+                      </Link>
+                      <Link
+                        href="/feedback"
+                        className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Feedback
                       </Link>
                       <Link
                         href="/submissions"

@@ -651,19 +651,35 @@ export default function AttendanceManagement({
                     <p className="text-sm text-gray-600 capitalize">
                       {selectedSession.session_type}
                     </p>
-                    {selectedSession.qr_status === "active" ? (
-                      <Badge className="mt-2 bg-green-500">
-                        QR Active -{" "}
-                        {Math.round(
-                          selectedSession.minutes_until_qr_expiry || 0
-                        )}{" "}
-                        min left
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive" className="mt-2">
-                        QR Expired
-                      </Badge>
-                    )}
+                    {(() => {
+                      // Calculate if QR is still active based on session time and duration
+                      const now = new Date();
+                      const sessionStart = new Date(
+                        selectedSession.start_time || selectedSession.created_at
+                      );
+                      const qrDuration =
+                        selectedSession.qr_duration_minutes || 5; // default 5 minutes
+                      const qrExpiry = new Date(
+                        sessionStart.getTime() + qrDuration * 60 * 1000
+                      );
+                      const isActive = now < qrExpiry;
+                      const minutesLeft = Math.max(
+                        0,
+                        Math.ceil(
+                          (qrExpiry.getTime() - now.getTime()) / (60 * 1000)
+                        )
+                      );
+
+                      return isActive ? (
+                        <Badge className="mt-2 bg-green-500">
+                          QR Active - {minutesLeft} min left
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive" className="mt-2">
+                          QR Expired
+                        </Badge>
+                      );
+                    })()}
                   </div>
 
                   <div className="flex justify-center">
@@ -2449,14 +2465,30 @@ function SessionCard({
 
         <div className="flex items-center gap-2 text-sm">
           <QrCode className="h-4 w-4" />
-          {session.qr_status === "active" ? (
-            <span className="text-green-600">
-              QR Active ({Math.round(session.minutes_until_qr_expiry || 0)}m
-              left)
-            </span>
-          ) : (
-            <span className="text-red-600">QR Expired</span>
-          )}
+          {(() => {
+            // Calculate if QR is still active based on session time and duration
+            const now = new Date();
+            const sessionStart = new Date(
+              session.start_time || session.created_at
+            );
+            const qrDuration = session.qr_duration_minutes || 5; // default 5 minutes
+            const qrExpiry = new Date(
+              sessionStart.getTime() + qrDuration * 60 * 1000
+            );
+            const isActive = now < qrExpiry;
+            const minutesLeft = Math.max(
+              0,
+              Math.ceil((qrExpiry.getTime() - now.getTime()) / (60 * 1000))
+            );
+
+            return isActive ? (
+              <span className="text-green-600">
+                QR Active ({minutesLeft}m left)
+              </span>
+            ) : (
+              <span className="text-red-600">QR Expired</span>
+            );
+          })()}
         </div>
 
         <div className="flex gap-2">
